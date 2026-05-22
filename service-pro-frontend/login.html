@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Service Pro SPA</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
+
+<div class="login-container">
+
+  <div class="left">
+    <img src="images/logo.png" class="login-logo" alt="Logo Service Pro SPA">
+    <h2>Service Pro SPA</h2>
+    <p>Gestiona tus servicios eléctricos de forma rápida y segura.</p>
+  </div>
+
+  <div class="right">
+
+    <!-- PANEL LOGIN -->
+    <div id="panel-login" class="auth-panel">
+      <h3>Bienvenido 👋</h3>
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+      <div class="forgot-link">
+        <a href="#" onclick="mostrarPanel('panel-recuperar')">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button onclick="login()">Ingresar</button>
+      <div class="auth-divider"><span>¿No tienes cuenta?</span></div>
+      <button class="btn-secondary" onclick="mostrarPanel('panel-registro')">Crear cuenta</button>
+    </div>
+
+    <!-- PANEL REGISTRO -->
+    <div id="panel-registro" class="auth-panel" style="display:none;">
+      <h3>Crear cuenta 📝</h3>
+      <div class="form-group">
+        <label for="reg-nombre">Nombre completo</label>
+        <input type="text" id="reg-nombre" placeholder="Ej: Juan Pérez">
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="form-group">
+        <label for="reg-confirm">Confirmar contraseña</label>
+        <input type="password" id="reg-confirm" placeholder="Repite tu contraseña">
+      </div>
+      <button onclick="registrar()">Registrarse</button>
+      <div class="auth-divider"><span>¿Ya tienes cuenta?</span></div>
+      <button class="btn-secondary" onclick="mostrarPanel('panel-login')">Volver al Login</button>
+    </div>
+
+    <!-- PANEL RECUPERAR -->
+    <div id="panel-recuperar" class="auth-panel" style="display:none;">
+      <h3>Recuperar contraseña 🔑</h3>
+      <p class="subtitulo-form">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+      <div class="form-group">
+        <label for="rec-email">Correo electrónico</label>
+        <input type="email" id="rec-email" placeholder="correo@ejemplo.com">
+      </div>
+      <button onclick="recuperarPassword()">Enviar enlace</button>
+      <div class="auth-divider"></div>
+      <button class="btn-secondary" onclick="mostrarPanel('panel-login')">Volver al Login</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  document.querySelectorAll('.auth-panel').forEach(p => {
+    if (p.style.display !== 'none') {
+      p.style.display = 'flex';
+      p.style.flexDirection = 'column';
+      p.style.gap = '16px';
+    }
+  });
+  function mostrarPanel(id) {
+    document.querySelectorAll('.auth-panel').forEach(p => p.style.display = 'none');
+    const panel = document.getElementById(id);
+    panel.style.display = 'flex';
+    panel.style.flexDirection = 'column';
+    panel.style.gap = '16px';
+  }
+</script>
+</body>
+</html>

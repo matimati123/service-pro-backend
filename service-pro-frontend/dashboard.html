@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Service Pro SPA</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <h1><img src="images/logo.png" class="logo-img" alt="Logo"> Service Pro <span>SPA</span></h1>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="#">Servicios</a>
+    <a href="contacto.html">Contacto</a>
+    <a href="ayuda.html">Ayuda</a>
+    <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
+    <a href="#" onclick="cerrarSesion()" class="nav-login">Cerrar sesión</a>
+  </nav>
+</header>
+
+<div class="page-container">
+  <div class="page-header">
+    <span class="hero-badge">⚡ Panel de Usuario</span>
+    <h2>Bienvenido, <span id="nombre-usuario">Usuario</span></h2>
+    <p>Gestiona tus servicios eléctricos desde aquí.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📷</div>
+      <h3>Instalación de Cámaras</h3>
+      <p>Sistemas de seguridad y videovigilancia para tu hogar o negocio.</p>
+      <a href="ordenes.html" class="btn">Solicitar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔌</div>
+      <h3>Instalación de Enchufes</h3>
+      <p>Instalación y reparación de enchufes e interruptores certificados.</p>
+      <a href="ordenes.html" class="btn">Solicitar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">💡</div>
+      <h3>Alumbrado</h3>
+      <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
+      <a href="ordenes.html" class="btn">Solicitar</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/chatbot.js"></script>
+<script>
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  if (usuario && usuario.nombre) {
+    document.getElementById('nombre-usuario').textContent = usuario.nombre;
+    document.getElementById('nav-usuario').textContent = '👤 ' + usuario.nombre;
+  } else {
+    window.location.href = 'login.html';
+  }
+  function cerrarSesion() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>

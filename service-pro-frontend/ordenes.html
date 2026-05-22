@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitar Servicio — Service Pro SPA</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <h1><img src="images/logo.png" class="logo-img" alt="Logo"> Service Pro <span>SPA</span></h1>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="#">Servicios</a>
+    <a href="contacto.html">Contacto</a>
+    <a href="ayuda.html">Ayuda</a>
+    <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
+    <a href="login.html" id="nav-sesion" class="nav-login">Login</a>
+  </nav>
+</header>
+
+<div class="form-container">
+  <h2>Solicitar Servicio ⚡</h2>
+  <p class="subtitulo">Completa el formulario y nos contactaremos contigo.</p>
+
+  <div class="form-group">
+    <label for="cliente">Nombre completo</label>
+    <input type="text" id="cliente" placeholder="Ej: Juan Pérez">
+  </div>
+
+  <div class="form-group">
+    <label for="direccion">Dirección</label>
+    <input type="text" id="direccion" placeholder="Ej: Av. Principal 123, Santiago">
+  </div>
+
+  <div class="form-group">
+    <label>Servicios requeridos</label>
+    <p class="subtitulo-form">Puedes seleccionar uno o más servicios.</p>
+    <div class="servicios-check">
+      <label class="check-card" id="card-camara">
+        <input type="checkbox" value="camara" onchange="toggleCard(this)">
+        <div class="check-content">
+          <span class="check-icon">📷</span>
+          <div><strong>Instalación de Cámaras</strong><p>Sistemas de seguridad y videovigilancia</p></div>
+        </div>
+        <span class="check-mark">✓</span>
+      </label>
+      <label class="check-card" id="card-enchufe">
+        <input type="checkbox" value="enchufe" onchange="toggleCard(this)">
+        <div class="check-content">
+          <span class="check-icon">🔌</span>
+          <div><strong>Instalación de Enchufes</strong><p>Enchufes e interruptores certificados</p></div>
+        </div>
+        <span class="check-mark">✓</span>
+      </label>
+      <label class="check-card" id="card-alumbrado">
+        <input type="checkbox" value="alumbrado" onchange="toggleCard(this)">
+        <div class="check-content">
+          <span class="check-icon">💡</span>
+          <div><strong>Alumbrado</strong><p>Iluminación interior y exterior</p></div>
+        </div>
+        <span class="check-mark">✓</span>
+      </label>
+    </div>
+    <span id="error-servicios" class="input-error"></span>
+  </div>
+
+  <div class="form-group">
+    <label>📅 Fecha y hora preferida para la visita</label>
+    <p class="subtitulo-form">Horario de atención: lunes a viernes 9:00 — 18:00 hrs.</p>
+    <div class="calendario-grid">
+      <div class="form-group">
+        <label for="fecha-visita">Fecha</label>
+        <input type="date" id="fecha-visita">
+      </div>
+      <div class="form-group">
+        <label for="hora-visita">Hora</label>
+        <select id="hora-visita">
+          <option value="">— Selecciona una hora —</option>
+          <option value="09:00">09:00 am</option>
+          <option value="10:00">10:00 am</option>
+          <option value="11:00">11:00 am</option>
+          <option value="12:00">12:00 pm</option>
+          <option value="13:00">13:00 pm</option>
+          <option value="14:00">14:00 pm</option>
+          <option value="15:00">15:00 pm</option>
+          <option value="16:00">16:00 pm</option>
+          <option value="17:00">17:00 pm</option>
+        </select>
+      </div>
+    </div>
+    <span id="error-fecha" class="input-error"></span>
+  </div>
+
+  <div class="form-group">
+    <label for="observaciones">Descripción del problema <span style="color:#a0a0a0; font-weight:400;">(opcional)</span></label>
+    <textarea id="observaciones" placeholder="Describe brevemente lo que necesitas o el problema que tienes..." rows="4"></textarea>
+  </div>
+
+  <button class="btn" onclick="crearOrden()">Enviar Solicitud</button>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/sesion.js"></script>
+<script src="js/chatbot.js"></script>
+<script>
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + 1);
+  document.getElementById('fecha-visita').min = hoy.toISOString().split('T')[0];
+
+  document.getElementById('fecha-visita').addEventListener('change', function() {
+    const fecha = new Date(this.value + 'T00:00:00');
+    const dia = fecha.getDay();
+    if (dia === 0 || dia === 6) {
+      this.value = '';
+      document.getElementById('error-fecha').textContent = 'Solo disponemos de atención de lunes a viernes.';
+    } else {
+      document.getElementById('error-fecha').textContent = '';
+    }
+  });
+
+  function toggleCard(checkbox) {
+    const card = checkbox.closest('.check-card');
+    checkbox.checked ? card.classList.add('selected') : card.classList.remove('selected');
+  }
+</script>
+</body>
+</html>

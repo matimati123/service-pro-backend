@@ -1,0 +1,376 @@
+/* =============================================
+   SERVICE PRO SPA — Panel de Administrador
+   ============================================= */
+
+.admin-body {
+  display: flex;
+  min-height: 100vh;
+  background: var(--negro);
+}
+
+/* =============================================
+   SIDEBAR
+   ============================================= */
+
+#sidebar {
+  width: 240px;
+  background: var(--gris-oscuro);
+  border-right: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 50;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--borde);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 11px 16px;
+  border-radius: 8px;
+  color: var(--gris-texto);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar-link:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--blanco);
+}
+
+.sidebar-link.active {
+  background: rgba(249,115,22,0.15);
+  color: var(--naranja);
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-footer a {
+  color: var(--gris-texto);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.sidebar-footer a:hover {
+  color: var(--naranja);
+}
+
+/* =============================================
+   CONTENIDO PRINCIPAL
+   ============================================= */
+
+#admin-content {
+  margin-left: 240px;
+  flex: 1;
+  padding: 0;
+  min-height: 100vh;
+}
+
+#admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--borde);
+  background: var(--gris-oscuro);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+#admin-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+}
+
+#admin-user {
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+}
+
+.admin-seccion {
+  padding: 32px;
+}
+
+/* =============================================
+   ESTADÍSTICAS
+   ============================================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--gris-oscuro);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card.naranja { border-color: rgba(249,115,22,0.3); }
+.stat-card.verde   { border-color: rgba(34,197,94,0.3); }
+.stat-card.azul    { border-color: rgba(59,130,246,0.3); }
+
+.stat-icon {
+  font-size: 2rem;
+}
+
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--blanco);
+}
+
+.stat-card.naranja .stat-num { color: var(--naranja); }
+.stat-card.verde   .stat-num { color: #22c55e; }
+.stat-card.azul    .stat-num { color: #3b82f6; }
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--gris-texto);
+  margin-top: 4px;
+}
+
+/* =============================================
+   CARDS DEL PANEL
+   ============================================= */
+
+.admin-card {
+  background: var(--gris-oscuro);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.admin-card-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.admin-card-header .btn {
+  padding: 8px 18px;
+  font-size: 0.82rem;
+}
+
+.admin-card-header select {
+  padding: 8px 14px;
+  background: var(--gris-medio);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  color: var(--blanco);
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  cursor: pointer;
+}
+
+/* =============================================
+   TABLAS
+   ============================================= */
+
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead tr {
+  background: rgba(255,255,255,0.03);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gris-texto);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--borde);
+}
+
+td {
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--blanco);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+.tabla-loading {
+  text-align: center;
+  color: var(--gris-texto);
+  padding: 32px !important;
+}
+
+/* Estado badges */
+.estado-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.estado-badge.pendiente  { background: rgba(249,115,22,0.15); color: #f97316; }
+.estado-badge.evaluada   { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+.estado-badge.cotizada   { background: rgba(168,85,247,0.15);  color: #a855f7; }
+.estado-badge.aprobada   { background: rgba(234,179,8,0.15);   color: #eab308; }
+.estado-badge.completado { background: rgba(34,197,94,0.15);   color: #22c55e; }
+.estado-badge.rechazada  { background: rgba(239,68,68,0.15);   color: #ef4444; }
+.estado-badge.cliente    { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+.estado-badge.admin      { background: rgba(249,115,22,0.15);  color: #f97316; }
+.estado-badge.tecnico    { background: rgba(34,197,94,0.15);   color: #22c55e; }
+
+/* Botón de tabla */
+.btn-tabla {
+  padding: 5px 12px;
+  background: rgba(249,115,22,0.15);
+  color: var(--naranja);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s;
+  margin-right: 6px;
+}
+
+.btn-tabla:hover {
+  background: rgba(249,115,22,0.25);
+}
+
+.select-estado {
+  padding: 5px 10px;
+  background: var(--gris-medio);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  color: var(--blanco);
+  font-size: 0.78rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  cursor: pointer;
+}
+
+/* =============================================
+   MODAL
+   ============================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: var(--gris-oscuro);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 36px;
+  width: 420px;
+  max-width: 95vw;
+}
+
+.modal-box h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.modal-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.modal-btns .btn {
+  width: 100%;
+  text-align: center;
+  padding: 13px;
+}
+
+.modal-btns .btn-secondary {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  color: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s;
+}
+
+.modal-btns .btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+}
