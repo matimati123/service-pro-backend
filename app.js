@@ -20,26 +20,73 @@ var mensajesRouter = require('./routes/mensajes');
 var app = express();
 
 // =============================================
-// HELMET — protege headers HTTP automáticamente
+// HELMET — CSP + todos los headers de seguridad
+// Fix: CSP, X-Frame-Options, X-Content-Type-Options,
+//      X-Powered-By, Referrer-Policy, HSTS
 // =============================================
-app.use(helmet());
+app.use(helmet({
+  // ✅ FIX: Cabecera Content Security Policy (CSP)
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'"],
+      styleSrc:       ["'self'", "'unsafe-inline'"],
+      imgSrc:         ["'self'", "data:"],
+      fontSrc:        ["'self'"],
+      connectSrc:     ["'self'", "https://imaginative-gelato-77a91c.netlify.app"],
+      frameSrc:       ["'none'"],
+      objectSrc:      ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+
+  // ✅ FIX: Anti-Clickjacking
+  frameguard: { action: 'deny' },
+
+  // ✅ FIX: X-Content-Type-Options (nosniff)
+  noSniff: true,
+
+  // ✅ FIX: Ocultar "X-Powered-By: Express"
+  hidePoweredBy: true,
+
+  // Referrer seguro
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+
+  // ✅ FIX: HSTS activado — fuerza HTTPS en producción
+  hsts: {
+    maxAge: 31536000,       // 1 año
+    includeSubDomains: true,
+    preload: true
+  },
+}));
 
 // =============================================
-// CORS — solo permite peticiones desde tu frontend
-// Cambia la URL cuando tengas dominio real
+// CACHE-CONTROL — Fix: Recuperado de Caché +
+//                Reexaminar Directivas de Caché
+// =============================================
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
+// =============================================
+// CORS — solo permite peticiones desde Netlify
 // =============================================
 app.use(cors({
-  origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
+  origin: ['https://imaginative-gelato-77a91c.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // =============================================
 // RATE LIMIT — máximo 100 peticiones cada 15 min
-// Protege contra fuerza bruta y spam
 // =============================================
 var limiterGeneral = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: { error: 'Demasiadas peticiones, intenta más tarde.' }
 });
