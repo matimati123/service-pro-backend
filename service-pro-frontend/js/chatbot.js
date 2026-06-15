@@ -190,7 +190,7 @@ function enviarMensajeLibre() {
   input.value = '';
 
   mostrarTyping(() => {
-    fetch('http://localhost:3000/mensajes', {
+    fetch('https://service-pro-backend-production.up.railway.app/mensajes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

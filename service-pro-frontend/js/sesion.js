@@ -3,15 +3,38 @@
 // Maneja la sesión en todas las páginas
 // =============================================
 
+// ✅ FIX: Validación de token antes de usar la sesión
+function tokenValido() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return false;
+  try {
+    // Decodifica el payload del JWT (sin verificar firma — eso lo hace el backend)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Verifica que no haya expirado
+    if (payload.exp && Date.now() / 1000 > payload.exp) {
+      sessionStorage.clear();
+      return false;
+    }
+    return true;
+  } catch (e) {
+    sessionStorage.clear();
+    return false;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  // ✅ FIX: Usar sessionStorage en lugar de localStorage
+  // localStorage persiste aunque cierres el navegador (riesgo XSS mayor)
+  // sessionStorage solo dura mientras la pestaña esté abierta
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
   const navUsuario = document.getElementById('nav-usuario');
   const navSesion = document.getElementById('nav-sesion');
 
   if (!navSesion) return;
 
-  if (usuario && usuario.nombre) {
-    // Mostrar nombre
+  // ✅ FIX: Verificar que el token sea válido antes de mostrar sesión
+  if (usuario && usuario.nombre && tokenValido()) {
+    // Mostrar nombre — ✅ FIX: usar textContent, nunca innerHTML (previene XSS)
     if (navUsuario) navUsuario.textContent = '👤 ' + usuario.nombre;
 
     // Cambiar botón según rol
@@ -36,15 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
       btnCerrar.style.background = '#333';
       btnCerrar.onclick = function(e) {
         e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
+        // ✅ FIX: Limpiar TODO sessionStorage al cerrar sesión
+        sessionStorage.clear();
         window.location.href = 'login.html';
       };
       nav.appendChild(btnCerrar);
     }
 
   } else {
-    // No hay sesión — mostrar Login
+    // No hay sesión válida — limpiar y mostrar Login
+    sessionStorage.clear();
     if (navUsuario) navUsuario.textContent = '';
     navSesion.textContent = 'Login';
     navSesion.href = 'login.html';

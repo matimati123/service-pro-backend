@@ -3,7 +3,7 @@
 // Lógica del panel de administrador
 // =============================================
 
-const API = 'http://localhost:3000';
+const API = 'https://service-pro-backend-production.up.railway.app';
 let todasLasOrdenes = [];
 
 // =============================================
