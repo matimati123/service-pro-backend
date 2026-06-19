@@ -118,22 +118,19 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/auth/google/callback'
+  callbackURL: 'https://service-pro-backend-production.up.railway.app/auth/google/callback'
 },
 async (accessToken, refreshToken, profile, done) => {
   try {
     const email = profile.emails[0].value;
     const nombre = profile.displayName;
 
-    // Buscar si el usuario ya existe en la BD
     db.query('SELECT * FROM usuarios WHERE email = ?', [email], (err, results) => {
       if (err) return done(err);
 
       if (results.length > 0) {
-        // Usuario ya existe → retornarlo
         return done(null, results[0]);
       } else {
-        // Usuario nuevo → crearlo
         db.query(
           'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
           [nombre, email, 'google_oauth', 'cliente'],

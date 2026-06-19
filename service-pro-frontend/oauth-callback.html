@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Autenticando...</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
+  <div style="text-align:center; margin-top: 40vh;">
+    <p style="color: #a0a0a0; font-size: 1.1rem;">⏳ Iniciando sesión con Google...</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    if (token) {
+      localStorage.setItem('token', token);
+
+      // Decodificar el token para obtener el rol
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      localStorage.setItem('usuario', JSON.stringify(payload));
+
+      // Redirigir según el rol
+      if (payload.rol === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'solicitar.html';
+      }
+    } else {
+      alert('Error al iniciar sesión con Google.');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
