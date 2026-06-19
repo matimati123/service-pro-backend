@@ -33,6 +33,14 @@
         <a href="#" onclick="mostrarPanel('panel-recuperar')">¿Olvidaste tu contraseña?</a>
       </div>
       <button onclick="login()">Ingresar</button>
+
+      <div class="auth-divider"><span>o continúa con</span></div>
+
+      <button class="btn-google" onclick="loginConGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Iniciar sesión con Google
+      </button>
+
       <div class="auth-divider"><span>¿No tienes cuenta?</span></div>
       <button class="btn-secondary" onclick="mostrarPanel('panel-registro')">Crear cuenta</button>
     </div>
@@ -57,6 +65,14 @@
         <input type="password" id="reg-confirm" placeholder="Repite tu contraseña">
       </div>
       <button onclick="registrar()">Registrarse</button>
+
+      <div class="auth-divider"><span>o regístrate con</span></div>
+
+      <button class="btn-google" onclick="loginConGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Registrarse con Google
+      </button>
+
       <div class="auth-divider"><span>¿Ya tienes cuenta?</span></div>
       <button class="btn-secondary" onclick="mostrarPanel('panel-login')">Volver al Login</button>
     </div>
@@ -79,6 +95,12 @@
 
 <script src="js/app.js"></script>
 <script>
+  const BACKEND_URL = 'https://service-pro-backend-production.up.railway.app';
+
+  function loginConGoogle() {
+    window.location.href = BACKEND_URL + '/auth/google';
+  }
+
   document.querySelectorAll('.auth-panel').forEach(p => {
     if (p.style.display !== 'none') {
       p.style.display = 'flex';
@@ -86,6 +108,7 @@
       p.style.gap = '16px';
     }
   });
+
   function mostrarPanel(id) {
     document.querySelectorAll('.auth-panel').forEach(p => p.style.display = 'none');
     const panel = document.getElementById(id);

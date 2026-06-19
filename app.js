@@ -4,6 +4,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+var jwt = require('jsonwebtoken');
 
 // === SEGURIDAD ===
 var helmet = require('helmet');
@@ -17,15 +21,13 @@ var facturasRouter = facturasModule.router;
 var ordenesRouter = require('./routes/ordenes');
 var mensajesRouter = require('./routes/mensajes');
 
+var db = require('./db');
 var app = express();
 
 // =============================================
-// HELMET — CSP + todos los headers de seguridad
-// Fix: CSP, X-Frame-Options, X-Content-Type-Options,
-//      X-Powered-By, Referrer-Policy, HSTS
+// HELMET
 // =============================================
 app.use(helmet({
-  // ✅ FIX: Cabecera Content Security Policy (CSP)
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
@@ -39,30 +41,19 @@ app.use(helmet({
       upgradeInsecureRequests: [],
     },
   },
-
-  // ✅ FIX: Anti-Clickjacking
   frameguard: { action: 'deny' },
-
-  // ✅ FIX: X-Content-Type-Options (nosniff)
   noSniff: true,
-
-  // ✅ FIX: Ocultar "X-Powered-By: Express"
   hidePoweredBy: true,
-
-  // Referrer seguro
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-
-  // ✅ FIX: HSTS activado — fuerza HTTPS en producción
   hsts: {
-    maxAge: 31536000,       // 1 año
+    maxAge: 31536000,
     includeSubDomains: true,
     preload: true
   },
 }));
 
 // =============================================
-// CACHE-CONTROL — Fix: Recuperado de Caché +
-//                Reexaminar Directivas de Caché
+// CACHE-CONTROL
 // =============================================
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -73,7 +64,7 @@ app.use((req, res, next) => {
 });
 
 // =============================================
-// CORS — solo permite peticiones desde Netlify
+// CORS
 // =============================================
 app.use(cors({
   origin: ['https://imaginative-gelato-77a91c.netlify.app'],
@@ -83,7 +74,7 @@ app.use(cors({
 }));
 
 // =============================================
-// RATE LIMIT — máximo 100 peticiones cada 15 min
+// RATE LIMIT
 // =============================================
 var limiterGeneral = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -91,7 +82,6 @@ var limiterGeneral = rateLimit({
   message: { error: 'Demasiadas peticiones, intenta más tarde.' }
 });
 
-// Rate limit más estricto solo para login (10 intentos por 15 min)
 var limiterLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -110,7 +100,87 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// view engine setup
+// =============================================
+// SESSION Y PASSPORT
+// =============================================
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// =============================================
+// GOOGLE OAUTH STRATEGY
+// =============================================
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: '/auth/google/callback'
+},
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails[0].value;
+    const nombre = profile.displayName;
+
+    // Buscar si el usuario ya existe en la BD
+    db.query('SELECT * FROM usuarios WHERE email = ?', [email], (err, results) => {
+      if (err) return done(err);
+
+      if (results.length > 0) {
+        // Usuario ya existe → retornarlo
+        return done(null, results[0]);
+      } else {
+        // Usuario nuevo → crearlo
+        db.query(
+          'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
+          [nombre, email, 'google_oauth', 'cliente'],
+          (err2, result) => {
+            if (err2) return done(err2);
+            db.query('SELECT * FROM usuarios WHERE id = ?', [result.insertId], (err3, rows) => {
+              if (err3) return done(err3);
+              return done(null, rows[0]);
+            });
+          }
+        );
+      }
+    });
+  } catch (err) {
+    return done(err);
+  }
+}));
+
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser((id, done) => {
+  db.query('SELECT * FROM usuarios WHERE id = ?', [id], (err, results) => {
+    done(err, results[0]);
+  });
+});
+
+// =============================================
+// RUTAS GOOGLE OAUTH
+// =============================================
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: process.env.FRONTEND_URL + '/login.html' }),
+  (req, res) => {
+    const token = jwt.sign(
+      { id: req.user.id, email: req.user.email, rol: req.user.rol },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+    res.redirect(`${process.env.FRONTEND_URL}/oauth-callback.html?token=${token}`);
+  }
+);
+
+// =============================================
+// VIEW ENGINE
+// =============================================
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
