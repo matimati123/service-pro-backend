@@ -118,7 +118,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'https://service-pro-backend-production.up.railway.app/auth/google/callback'
+  callbackURL: 'https://service-pro-backend-u3wn.onrender.com/auth/google/callback'
 },
 async (accessToken, refreshToken, profile, done) => {
   try {

@@ -95,7 +95,7 @@ function crearOrden() {
   const direccion = document.getElementById('direccion').value.trim();
   const observaciones = document.getElementById('observaciones')?.value.trim() || '';
 
-  fetch('https://service-pro-backend-production.up.railway.app/ordenes', {
+  fetch('https://service-pro-backend-u3wn.onrender.com/ordenes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cliente, direccion, servicios, observaciones, fecha_visita: fecha, hora_visita: hora })
@@ -142,7 +142,7 @@ function login() {
 
   if (!valido) return;
 
-  fetch('https://service-pro-backend-production.up.railway.app/users/login', {
+  fetch('https://service-pro-backend-u3wn.onrender.com/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: emailVal, password: passVal })
@@ -204,7 +204,7 @@ function registrar() {
 
   if (!valido) return;
 
-  fetch('https://service-pro-backend-production.up.railway.app/users/registro', {
+  fetch('https://service-pro-backend-u3wn.onrender.com/users/registro', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nombre, email, password: pass })
@@ -237,7 +237,7 @@ function recuperarPassword() {
     return;
   }
 
-  fetch('https://service-pro-backend-production.up.railway.app/users/recuperar', {
+  fetch('https://service-pro-backend-u3wn.onrender.com/users/recuperar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email })
