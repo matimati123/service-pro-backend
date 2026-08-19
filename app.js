@@ -167,7 +167,7 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: process.env.FRONTEND_URL + '/login.html' }),
   (req, res) => {
     const token = jwt.sign(
-      { id: req.user.id, email: req.user.email, rol: req.user.rol },
+      { id: req.user.id, email: req.user.email, rol: req.user.rol, nombre: req.user.nombre },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
