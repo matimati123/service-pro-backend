@@ -17,15 +17,22 @@
     if (token) {
       localStorage.setItem('token', token);
 
-      // Decodificar el token para obtener el rol
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Decodificar el token para obtener el rol (maneja UTF-8 correctamente, ej. ñ, tildes)
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const payload = JSON.parse(jsonPayload);
       localStorage.setItem('usuario', JSON.stringify(payload));
 
       // Redirigir según el rol
       if (payload.rol === 'admin') {
         window.location.href = 'admin.html';
       } else {
-        window.location.href = 'solicitar.html';
+        window.location.href = 'dashboard.html';
       }
     } else {
       alert('Error al iniciar sesión con Google.');
@@ -33,4 +40,4 @@
     }
   </script>
 </body>
-</html>
+</html> // test auto-deploy
