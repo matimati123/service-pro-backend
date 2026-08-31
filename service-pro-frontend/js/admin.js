@@ -1,9 +1,9 @@
 // =============================================
-// SERVICE PRO SPA — admin.js
+// VOLTIA PRO SPA — admin.js
 // Lógica del panel de administrador
 // =============================================
 
-const API = 'https://service-pro-backend-production.up.railway.app';
+const API = 'https://service-pro-backend-u3wn.onrender.com';
 let todasLasOrdenes = [];
 
 // =============================================

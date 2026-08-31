@@ -1,5 +1,5 @@
 // =============================================
-// SERVICE PRO SPA — Chatbot
+// VOLTIA PRO SPA — Chatbot
 // Verifica sesión JWT antes de enviar mensaje
 // =============================================
 
@@ -79,7 +79,7 @@ function crearChatbot() {
           <div id="chatbot-header-info">
             <div id="chatbot-avatar">⚡</div>
             <div>
-              <div id="chatbot-nombre">Service Pro SPA</div>
+              <div id="chatbot-nombre">Voltia Pro SPA</div>
               <div id="chatbot-estado">● En línea</div>
             </div>
           </div>
@@ -122,7 +122,7 @@ function iniciarChat() {
   if (usuario) {
     agregarMsgBot(`¡Hola <strong>${usuario.nombre}</strong>! 👋 ¿En qué puedo ayudarte?`);
   } else {
-    agregarMsgBot('¡Hola! 👋 Soy el asistente de <strong>Service Pro SPA</strong>. ¿En qué puedo ayudarte?');
+    agregarMsgBot('¡Hola! 👋 Soy el asistente de <strong>Voltia Pro SPA</strong>. ¿En qué puedo ayudarte?');
   }
 
   agregarMsgBot('Selecciona una pregunta frecuente:');
@@ -190,7 +190,7 @@ function enviarMensajeLibre() {
   input.value = '';
 
   mostrarTyping(() => {
-    fetch('https://service-pro-backend-production.up.railway.app/mensajes', {
+    fetch('https://service-pro-backend-u3wn.onrender.com/mensajes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

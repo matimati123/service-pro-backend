@@ -1,5 +1,5 @@
 // =============================================
-// SERVICE PRO SPA — sesion.js
+// VOLTIA PRO SPA — sesion.js
 // Maneja la sesión en todas las páginas
 // =============================================
 

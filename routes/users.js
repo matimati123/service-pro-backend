@@ -1,5 +1,5 @@
 // =============================================
-// SERVICE PRO SPA — routes/users.js
+// VOLTIA PRO SPA — routes/users.js
 // Registro, Login con bcrypt + JWT
 // =============================================
 

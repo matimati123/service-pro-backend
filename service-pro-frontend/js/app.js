@@ -1,5 +1,5 @@
 // =============================================
-// SERVICE PRO SPA — app.js Frontend
+// VOLTIA PRO SPA — app.js Frontend
 // Validaciones + Conexión al Backend
 // =============================================
 

@@ -1,5 +1,5 @@
 // =============================================
-// SERVICE PRO SPA — routes/mensajes.js
+// VOLTIA PRO SPA — routes/mensajes.js
 // Guarda mensajes en BD + envía mail con nodemailer
 // =============================================
 
@@ -61,10 +61,10 @@ router.post('/', async (req, res) => {
     const mailOptions = {
       from: 'serviceprospa777@gmail.com',
       to: 'serviceprospa777@gmail.com',
-      subject: '📩 Nuevo mensaje en el chatbot — Service Pro SPA',
+      subject: '📩 Nuevo mensaje en el chatbot — Voltia Pro SPA',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
-          <h2 style="color: #f97316;">⚡ Service Pro SPA</h2>
+          <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
           <h3 style="color: #333;">Nuevo mensaje del chatbot</h3>
           <table style="width:100%; border-collapse: collapse;">
             <tr>
@@ -84,7 +84,7 @@ router.post('/', async (req, res) => {
               <td style="padding: 8px;">${new Date().toLocaleString('es-CL')}</td>
             </tr>
           </table>
-          <p style="color: #999; font-size: 12px; margin-top: 20px;">Este mensaje fue enviado desde el chatbot de Service Pro SPA.</p>
+          <p style="color: #999; font-size: 12px; margin-top: 20px;">Este mensaje fue enviado desde el chatbot de Voltia Pro SPA.</p>
         </div>
       `
     };

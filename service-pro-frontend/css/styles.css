@@ -1,5 +1,5 @@
 /* =============================================
-   SERVICE PRO SPA — Styles
+   VOLTIA PRO SPA — Styles
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap');
@@ -261,6 +261,115 @@ nav a.nav-login:hover {
   transition: border-color 0.2s, transform 0.2s;
   position: relative;
   overflow: hidden;
+}
+
+/* =============================================
+   FLIP CARDS (Servicios)
+============================================= */
+.flip-card {
+  background: transparent;
+  height: 340px;
+  perspective: 1200px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+}
+
+.flip-card-front {
+  z-index: 2;
+  background-size: cover;
+  background-position: center;
+  justify-content: flex-end;
+}
+
+.flip-card-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,10,10,0.92) 10%, rgba(10,10,10,0.15) 70%);
+  border-radius: 12px;
+}
+
+.flip-card-front .flip-card-icon,
+.flip-card-front h3 {
+  position: relative;
+  z-index: 1;
+}
+
+.flip-card-front h3 {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.flip-card-back {
+  background: var(--gris-medio);
+  transform: rotateY(180deg);
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  z-index: 1;
+}
+
+.flip-card:hover .flip-card-front {
+  pointer-events: none;
+}
+
+.flip-card-back {
+  pointer-events: none;
+}
+
+.flip-card:hover .flip-card-back {
+  pointer-events: auto;
+}
+
+.flip-card-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.flip-card-back h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.flip-card-back p {
+  font-size: 0.875rem;
+  color: var(--gris-texto);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.flip-card-back .btn {
+  font-size: 0.85rem;
+  padding: 10px 22px;
 }
 
 .card::before {
@@ -1286,49 +1395,94 @@ header h1 span {
   }
 
   nav {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
-    left: 0;
     right: 0;
     bottom: 0;
-    width: 100vw;
+    width: min(300px, 78vw);
     height: 100vh;
-    background: rgba(10,10,10,0.99);
+    background: linear-gradient(180deg, #191919 0%, #0a0a0a 100%);
+    border-left: 1px solid var(--borde);
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 100px 24px 32px;
     z-index: 150;
-    overflow: hidden;
+    box-shadow: -24px 0 60px rgba(0,0,0,0.55);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+  }
+
+  nav::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s;
   }
 
   nav.open {
-    display: flex;
+    transform: translateX(0);
+  }
+
+  nav.open::before {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   nav a {
-    font-size: 1.4rem;
-    padding: 14px 32px;
-    width: 80%;
-    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 15px 14px;
+    width: 100%;
+    text-align: left;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  nav a:nth-child(1)::before { content: '🏠'; }
+  nav a:nth-child(2)::before { content: '⚡'; }
+  nav a:nth-child(3)::before { content: '✉️'; }
+  nav a:nth-child(4)::before { content: '❓'; }
+
+  nav a:active {
+    background: rgba(255,255,255,0.06);
   }
 
   nav a.nav-login {
-    margin-top: 8px;
+    margin-top: 20px;
+    justify-content: center;
+    border-bottom: none;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  nav a.nav-login::before {
+    content: '';
   }
 
   .hero {
     padding: 0 20px;
     height: auto;
-    min-height: 85vh;
+    min-height: 70vh;
+    background-position: 75% center;
   }
 
   .hero::before {
     background: linear-gradient(
       180deg,
-      rgba(10,10,10,0.85) 0%,
-      rgba(10,10,10,0.60) 100%
+      rgba(10,10,10,0.88) 0%,
+      rgba(10,10,10,0.45) 55%,
+      rgba(10,10,10,0.75) 100%
     );
   }
 
