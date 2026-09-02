@@ -151,6 +151,10 @@ router.put('/:id/asignar', async (req, res) => {
         to: tecnico_email,
         subject: `⚡ Nueva orden asignada #${orden.id} — Voltia Pro SPA`,
         html: `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"></head>
+          <body>
           <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
             <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
             <h3>Hola ${tecnico_nombre}, tienes una nueva orden asignada</h3>
@@ -179,6 +183,8 @@ router.put('/:id/asignar', async (req, res) => {
             <p style="margin-top: 20px; color: #333;">Por favor dirígete a la dirección indicada para evaluar el trabajo.</p>
             <p style="color: #999; font-size: 12px;">Voltia Pro SPA — Sistema de Gestión</p>
           </div>
+          </body>
+          </html>
         `
       });
     } catch (mailErr) {

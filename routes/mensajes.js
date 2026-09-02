@@ -79,6 +79,10 @@ router.post('/', async (req, res) => {
         to: 'serviceprospa777@gmail.com',
         subject: '📩 Nuevo mensaje en el chatbot — Voltia Pro SPA',
         html: `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"></head>
+          <body>
           <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
             <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
             <h3 style="color: #333;">Nuevo mensaje del chatbot</h3>
@@ -102,6 +106,8 @@ router.post('/', async (req, res) => {
             </table>
             <p style="color: #999; font-size: 12px; margin-top: 20px;">Este mensaje fue enviado desde el chatbot de Voltia Pro SPA.</p>
           </div>
+          </body>
+          </html>
         `
       });
     } catch (mailErr) {
