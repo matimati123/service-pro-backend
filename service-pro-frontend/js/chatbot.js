@@ -43,7 +43,7 @@ const chatbotData = [
 // =============================================
 function obtenerUsuario() {
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) return null;
 
     // Decodificar payload del JWT (sin verificar firma, solo leer datos)
@@ -51,8 +51,8 @@ function obtenerUsuario() {
 
     // Verificar que no haya expirado
     if (payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('usuario');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('usuario');
       return null;
     }
 
@@ -194,7 +194,7 @@ function enviarMensajeLibre() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
       },
       body: JSON.stringify({
         nombre: usuario.nombre,

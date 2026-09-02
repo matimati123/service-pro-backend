@@ -79,7 +79,7 @@
 <script src="js/app.js"></script>
 <script src="js/chatbot.js"></script>
 <script>
-  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
   if (usuario && usuario.nombre) {
     document.getElementById('nombre-usuario').textContent = usuario.nombre;
     document.getElementById('nav-usuario').textContent = '👤 ' + usuario.nombre;
@@ -87,8 +87,8 @@
     window.location.href = 'login.html';
   }
   function cerrarSesion() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
     window.location.href = 'login.html';
   }
 </script>

@@ -153,8 +153,8 @@ function login() {
       mostrarError('password', data.error);
     } else {
       // Guardar token y datos del usuario
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
       // Redirigir según rol
       if (data.usuario.rol === 'admin') {
         window.location.href = 'admin.html';

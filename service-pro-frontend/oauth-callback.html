@@ -15,7 +15,7 @@
     const token = params.get('token');
 
     if (token) {
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
 
       // Decodificar el token para obtener el rol (maneja UTF-8 correctamente, ej. ñ, tildes)
       const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -26,7 +26,7 @@
           .join('')
       );
       const payload = JSON.parse(jsonPayload);
-      localStorage.setItem('usuario', JSON.stringify(payload));
+      sessionStorage.setItem('usuario', JSON.stringify(payload));
 
       // Redirigir según el rol
       if (payload.rol === 'admin') {
@@ -40,4 +40,4 @@
     }
   </script>
 </body>
-</html> // test auto-deploy
+</html>

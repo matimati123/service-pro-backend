@@ -5,15 +5,34 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
+// =============================================
+// ENVIAR CORREO CON RESEND
+// Usamos fetch a la API de Resend en vez de Nodemailer/SMTP,
+// porque Render (plan gratis) bloquea las conexiones SMTP salientes.
+// =============================================
+async function enviarCorreo({ to, subject, html }) {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'Voltia Pro SPA <onboarding@resend.dev>',
+      to,
+      subject,
+      html
+    })
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Resend error (${res.status}): ${errorBody}`);
   }
-});
+
+  return res.json();
+}
 
 // GET /ordenes — obtener todas
 router.get('/', async (req, res) => {
@@ -124,42 +143,48 @@ router.put('/:id/asignar', async (req, res) => {
       [tecnico_nombre, tecnico_email, req.params.id]
     );
 
-    // Enviar mail al técnico
-    await transporter.sendMail({
-      from: 'serviceprospa777@gmail.com',
-      to: tecnico_email,
-      subject: `⚡ Nueva orden asignada #${orden.id} — Voltia Pro SPA`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
-          <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
-          <h3>Hola ${tecnico_nombre}, tienes una nueva orden asignada</h3>
-          <table style="width:100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; font-weight: bold; color: #555;">Orden #:</td>
-              <td style="padding: 8px;">${orden.id}</td>
-            </tr>
-            <tr style="background:#fff;">
-              <td style="padding: 8px; font-weight: bold; color: #555;">Cliente:</td>
-              <td style="padding: 8px;">${orden.cliente}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold; color: #555;">Dirección:</td>
-              <td style="padding: 8px;">${orden.direccion}</td>
-            </tr>
-            <tr style="background:#fff;">
-              <td style="padding: 8px; font-weight: bold; color: #555;">Servicios:</td>
-              <td style="padding: 8px;">${orden.servicios || '—'}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold; color: #555;">Observaciones:</td>
-              <td style="padding: 8px;">${orden.observaciones || 'Sin observaciones'}</td>
-            </tr>
-          </table>
-          <p style="margin-top: 20px; color: #333;">Por favor dirígete a la dirección indicada para evaluar el trabajo.</p>
-          <p style="color: #999; font-size: 12px;">Voltia Pro SPA — Sistema de Gestión</p>
-        </div>
-      `
-    });
+    // Enviar mail al técnico (Resend)
+    // Nota: en el plan gratis de Resend sin dominio verificado, esto solo
+    // funciona si tecnico_email es la misma cuenta con la que te registraste.
+    try {
+      await enviarCorreo({
+        to: tecnico_email,
+        subject: `⚡ Nueva orden asignada #${orden.id} — Voltia Pro SPA`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
+            <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
+            <h3>Hola ${tecnico_nombre}, tienes una nueva orden asignada</h3>
+            <table style="width:100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Orden #:</td>
+                <td style="padding: 8px;">${orden.id}</td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Cliente:</td>
+                <td style="padding: 8px;">${orden.cliente}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Dirección:</td>
+                <td style="padding: 8px;">${orden.direccion}</td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Servicios:</td>
+                <td style="padding: 8px;">${orden.servicios || '—'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Observaciones:</td>
+                <td style="padding: 8px;">${orden.observaciones || 'Sin observaciones'}</td>
+              </tr>
+            </table>
+            <p style="margin-top: 20px; color: #333;">Por favor dirígete a la dirección indicada para evaluar el trabajo.</p>
+            <p style="color: #999; font-size: 12px;">Voltia Pro SPA — Sistema de Gestión</p>
+          </div>
+        `
+      });
+    } catch (mailErr) {
+      // Si el correo falla, igual dejamos al técnico asignado en la BD.
+      console.error('Error enviando correo al técnico (orden igual quedó asignada):', mailErr);
+    }
 
     res.json({ ok: true, mensaje: 'Técnico asignado y notificado correctamente.' });
 

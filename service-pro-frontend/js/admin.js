@@ -11,7 +11,7 @@ let todasLasOrdenes = [];
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
   // Verificar que sea admin
-  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
   if (!usuario || usuario.rol !== 'admin') {
     alert('Acceso denegado. Solo administradores.');
     window.location.href = 'login.html';
@@ -53,7 +53,7 @@ function mostrarSeccion(id) {
 // =============================================
 async function cargarDashboard() {
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
     const [resOrdenes, resUsuarios] = await Promise.all([
@@ -114,7 +114,7 @@ function renderTablaRecientes(ordenes) {
 // =============================================
 async function cargarOrdenes() {
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const res = await fetch(`${API}/ordenes`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -165,7 +165,7 @@ function filtrarOrdenes() {
 async function cambiarEstado(ordenId, nuevoEstado) {
   if (!nuevoEstado) return;
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     await fetch(`${API}/ordenes/${ordenId}/estado`, {
       method: 'PUT',
       headers: {
@@ -207,7 +207,7 @@ async function asignarTecnico() {
   }
 
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const res = await fetch(`${API}/ordenes/${ordenId}/asignar`, {
       method: 'PUT',
       headers: {
@@ -235,7 +235,7 @@ async function asignarTecnico() {
 // =============================================
 async function cargarUsuarios() {
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const res = await fetch(`${API}/users`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -264,7 +264,7 @@ async function cargarUsuarios() {
 // =============================================
 async function cargarMensajes() {
   try {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const res = await fetch(`${API}/mensajes`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -292,7 +292,7 @@ async function cargarMensajes() {
 // CERRAR SESIÓN
 // =============================================
 function cerrarSesion() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('usuario');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('usuario');
   window.location.href = 'login.html';
 }
