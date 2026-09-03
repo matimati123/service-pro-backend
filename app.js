@@ -20,6 +20,7 @@ var facturasModule = require('./routes/facturas');
 var facturasRouter = facturasModule.router;
 var ordenesRouter = require('./routes/ordenes');
 var mensajesRouter = require('./routes/mensajes');
+var healthRouter = require('./routes/health');
 
 var db = require('./db');
 var app = express();
@@ -189,6 +190,7 @@ app.use('/users', usersRouter);
 app.use('/facturas', facturasRouter);
 app.use('/ordenes', ordenesRouter);
 app.use('/mensajes', mensajesRouter);
+app.use('/health', healthRouter);
 
 // =============================================
 // MANEJO DE ERRORES
@@ -205,4 +207,3 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-// test auto-deploy

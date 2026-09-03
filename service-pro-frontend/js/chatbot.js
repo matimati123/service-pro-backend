@@ -47,7 +47,16 @@ function obtenerUsuario() {
     if (!token) return null;
 
     // Decodificar payload del JWT (sin verificar firma, solo leer datos)
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Decodifica el payload del JWT manejando correctamente caracteres
+    // especiales (ñ, tildes, etc.) — atob() solo no basta para UTF-8.
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(jsonPayload);
 
     // Verificar que no haya expirado
     if (payload.exp * 1000 < Date.now()) {
