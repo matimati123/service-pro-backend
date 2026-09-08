@@ -88,6 +88,23 @@ router.post('/', async (req, res) => {
       );
     }
 
+    // Avisar a n8n para que notifique por correo la nueva orden.
+    // Igual que con Resend: si esto falla, no debe romper la creación
+    // de la orden, que ya quedó guardada en la BD.
+    try {
+      await fetch('https://matimunoz123.app.n8n.cloud/webhook/d9fc9708-d939-4be2-9fbf-c320ff727618', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cliente,
+          direccion,
+          servicios: servicios.join(', ')
+        })
+      });
+    } catch (webhookErr) {
+      console.error('Error notificando a n8n (orden igual quedó creada):', webhookErr);
+    }
+
     res.json({ ok: true, id: ordenId, mensaje: 'Orden creada correctamente.' });
   } catch (err) {
     console.error(err);
