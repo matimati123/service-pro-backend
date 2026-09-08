@@ -74,8 +74,8 @@ router.post('/', async (req, res) => {
 
   try {
     const [result] = await db.promise().query(
-      'INSERT INTO ordenes (cliente, direccion, estado, observaciones) VALUES (?, ?, "pendiente", ?)',
-      [cliente, direccion, observaciones || null]
+      'INSERT INTO ordenes (cliente, direccion, estado, observaciones) VALUES (?, ?, ?, ?)',
+      [cliente, direccion, 'pendiente', observaciones || null]
     );
 
     const ordenId = result.insertId;
@@ -156,8 +156,8 @@ router.put('/:id/asignar', async (req, res) => {
 
     // Actualizar técnico en la orden
     await db.promise().query(
-      'UPDATE ordenes SET tecnico_nombre = ?, tecnico_email = ?, estado = "evaluada" WHERE id = ?',
-      [tecnico_nombre, tecnico_email, req.params.id]
+      'UPDATE ordenes SET tecnico_nombre = ?, tecnico_email = ?, estado = ? WHERE id = ?',
+      [tecnico_nombre, tecnico_email, 'evaluada', req.params.id]
     );
 
     // Enviar mail al técnico (Resend)
