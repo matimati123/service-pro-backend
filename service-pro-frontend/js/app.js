@@ -151,6 +151,10 @@ function login() {
   .then(data => {
     if (data.error) {
       mostrarError('password', data.error);
+    } else if (data.requiere2FA) {
+      // Admin: guardamos el correo para el segundo paso y mostramos el panel del código
+      sessionStorage.setItem('email_2fa_pendiente', data.email);
+      mostrarPanel('panel-2fa');
     } else {
       // Guardar token y datos del usuario
       sessionStorage.setItem('token', data.token);
@@ -165,6 +169,48 @@ function login() {
   })
   .catch(err => {
     alert('❌ Error al iniciar sesión. Intenta nuevamente.');
+    console.error(err);
+  });
+}
+
+// =============================================
+// VERIFICAR CÓDIGO 2FA (segundo paso, solo admin)
+// =============================================
+function verificar2FA() {
+  limpiarError('codigo-2fa');
+
+  const codigo = document.getElementById('codigo-2fa')?.value.trim();
+  const email = sessionStorage.getItem('email_2fa_pendiente');
+
+  if (!codigo || codigo.length !== 6) {
+    mostrarError('codigo-2fa', 'Ingresa el código de 6 dígitos.');
+    return;
+  }
+
+  if (!email) {
+    alert('❌ Tu sesión de verificación expiró. Inicia sesión de nuevo.');
+    mostrarPanel('panel-login');
+    return;
+  }
+
+  fetch('https://service-pro-backend-u3wn.onrender.com/users/verificar-2fa', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, codigo })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      mostrarError('codigo-2fa', data.error);
+    } else {
+      sessionStorage.removeItem('email_2fa_pendiente');
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
+      window.location.href = 'admin.html';
+    }
+  })
+  .catch(err => {
+    alert('❌ Error al verificar el código. Intenta nuevamente.');
     console.error(err);
   });
 }

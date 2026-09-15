@@ -90,6 +90,19 @@
       <button class="btn-secondary" onclick="mostrarPanel('panel-login')">Volver al Login</button>
     </div>
 
+    <!-- PANEL 2FA (solo admin) -->
+    <div id="panel-2fa" class="auth-panel" style="display:none;">
+      <h3>Verificación en 2 pasos 🔐</h3>
+      <p class="subtitulo-form">Te enviamos un código de 6 dígitos a tu correo. Ingrésalo para continuar.</p>
+      <div class="form-group">
+        <label for="codigo-2fa">Código de verificación</label>
+        <input type="text" id="codigo-2fa" placeholder="123456" maxlength="6" inputmode="numeric" style="letter-spacing: 6px; text-align: center; font-size: 1.4rem;">
+      </div>
+      <button onclick="verificar2FA()">Verificar</button>
+      <div class="auth-divider"></div>
+      <button class="btn-secondary" onclick="mostrarPanel('panel-login')">Volver al Login</button>
+    </div>
+
   </div>
 </div>
 
@@ -119,3 +132,4 @@
 </script>
 </body>
 </html>
+// test auto-deploy
