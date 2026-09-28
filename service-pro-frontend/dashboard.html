@@ -15,6 +15,7 @@
     <a href="#">Servicios</a>
     <a href="contacto.html">Contacto</a>
     <a href="ayuda.html">Ayuda</a>
+    <a href="mis-ordenes.html">Mis órdenes</a>
     <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
     <a href="#" onclick="cerrarSesion()" class="nav-login">Cerrar sesión</a>
   </nav>
@@ -25,6 +26,7 @@
     <span class="hero-badge">⚡ Panel de Usuario</span>
     <h2>Bienvenido, <span id="nombre-usuario">Usuario</span></h2>
     <p>Gestiona tus servicios eléctricos desde aquí.</p>
+    <a href="mis-ordenes.html" class="btn" style="display:inline-block; margin-top:14px;">Ver mis órdenes y calificar</a>
   </div>
 
   <div class="cards">
@@ -58,39 +60,3 @@
         </div>
       </div>
     </div>
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front" style="background-image: url('images/servicio-alumbrado.jpg');">
-          <div class="flip-card-shade"></div>
-          <div class="flip-card-icon">💡</div>
-          <h3>Alumbrado</h3>
-        </div>
-        <div class="flip-card-back">
-          <div class="flip-card-icon">💡</div>
-          <h3>Alumbrado</h3>
-          <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="js/app.js"></script>
-<script src="js/chatbot.js"></script>
-<script>
-  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
-  if (usuario && usuario.nombre) {
-    document.getElementById('nombre-usuario').textContent = usuario.nombre;
-    document.getElementById('nav-usuario').textContent = '👤 ' + usuario.nombre;
-  } else {
-    window.location.href = 'login.html';
-  }
-  function cerrarSesion() {
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('usuario');
-    window.location.href = 'login.html';
-  }
-</script>
-</body>
-</html>

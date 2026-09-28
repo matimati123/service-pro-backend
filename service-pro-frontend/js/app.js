@@ -95,9 +95,14 @@ function crearOrden() {
   const direccion = document.getElementById('direccion').value.trim();
   const observaciones = document.getElementById('observaciones')?.value.trim() || '';
 
+  // Si hay sesión iniciada, mandamos el token para que la orden quede a nombre del usuario
+  const token = sessionStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   fetch('https://service-pro-backend-u3wn.onrender.com/ordenes', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ cliente, direccion, servicios, observaciones, fecha_visita: fecha, hora_visita: hora })
   })
   .then(res => res.json())

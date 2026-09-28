@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { verificarToken, tokenOpcional } = require('../middleware/auth');
 
 // =============================================
 // ENVIAR CORREO CON RESEND
@@ -51,6 +52,69 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /ordenes/mias — órdenes del usuario logueado, con su calificación
+// (va ANTES de /:id, si no "mias" se interpretaría como un id)
+router.get('/mias', verificarToken, async (req, res) => {
+  try {
+    const [ordenes] = await db.promise().query(
+      `SELECT o.id, o.direccion, o.estado, o.created_at,
+              GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ', ') AS servicios,
+              c.estrellas, c.comentario
+       FROM ordenes o
+       LEFT JOIN servicios_orden s ON s.orden_id = o.id
+       LEFT JOIN calificaciones c ON c.orden_id = o.id
+       WHERE o.usuario_id = ?
+       GROUP BY o.id, c.estrellas, c.comentario
+       ORDER BY o.created_at DESC`,
+      [req.user.id]
+    );
+    res.json(ordenes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener tus órdenes.' });
+  }
+});
+
+// POST /ordenes/:id/calificacion — calificar una orden completada
+router.post('/:id/calificacion', verificarToken, async (req, res) => {
+  const estrellas = Number(req.body.estrellas);
+  const comentario = (req.body.comentario || '').toString().trim();
+
+  if (!Number.isInteger(estrellas) || estrellas < 1 || estrellas > 5) {
+    return res.status(400).json({ error: 'La calificación debe ser de 1 a 5 estrellas.' });
+  }
+  if (comentario.length > 500) {
+    return res.status(400).json({ error: 'El comentario no puede superar los 500 caracteres.' });
+  }
+
+  try {
+    const [ordenes] = await db.promise().query(
+      'SELECT id, estado, usuario_id FROM ordenes WHERE id = ?', [req.params.id]
+    );
+    if (!ordenes.length) return res.status(404).json({ error: 'Orden no encontrada.' });
+
+    const orden = ordenes[0];
+    if (orden.usuario_id !== req.user.id) {
+      return res.status(403).json({ error: 'Solo puedes calificar tus propias órdenes.' });
+    }
+    if (orden.estado !== 'completado') {
+      return res.status(400).json({ error: 'Solo puedes calificar órdenes completadas.' });
+    }
+
+    await db.promise().query(
+      'INSERT INTO calificaciones (orden_id, usuario_id, estrellas, comentario) VALUES (?, ?, ?, ?)',
+      [orden.id, req.user.id, estrellas, comentario || null]
+    );
+    res.json({ ok: true, mensaje: '¡Gracias por tu calificación!' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Esta orden ya fue calificada.' });
+    }
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar la calificación.' });
+  }
+});
+
 // GET /ordenes/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -65,7 +129,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /ordenes — crear orden
-router.post('/', async (req, res) => {
+router.post('/', tokenOpcional, async (req, res) => {
   const { cliente, direccion, servicios, observaciones } = req.body;
 
   if (!cliente || !direccion || !servicios || servicios.length === 0) {
@@ -74,8 +138,8 @@ router.post('/', async (req, res) => {
 
   try {
     const [result] = await db.promise().query(
-      'INSERT INTO ordenes (cliente, direccion, estado, observaciones) VALUES (?, ?, ?, ?)',
-      [cliente, direccion, 'pendiente', observaciones || null]
+      'INSERT INTO ordenes (cliente, direccion, estado, observaciones, usuario_id) VALUES (?, ?, ?, ?, ?)',
+      [cliente, direccion, 'pendiente', observaciones || null, req.user ? req.user.id : null]
     );
 
     const ordenId = result.insertId;

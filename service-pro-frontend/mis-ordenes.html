@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis órdenes — Voltia Pro SPA</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/calificaciones.css">
+</head>
+<body>
+
+<header>
+  <h1><img src="images/logo.png" class="logo-img" alt="Logo"> Voltia Pro <span>SPA</span></h1>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="dashboard.html">Servicios</a>
+    <a href="contacto.html">Contacto</a>
+    <a href="ayuda.html">Ayuda</a>
+    <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
+    <a href="login.html" id="nav-sesion" class="nav-login">Login</a>
+  </nav>
+</header>
+
+<div class="page-container">
+  <div class="page-header">
+    <span class="hero-badge">⚡ Mis órdenes</span>
+    <h2>Historial de servicios</h2>
+    <p>Cuando un trabajo esté completado, podrás calificarlo.</p>
+  </div>
+
+  <div id="lista-ordenes" class="ordenes-lista">
+    <p class="ordenes-estado-msg">Cargando tus órdenes…</p>
+  </div>
+</div>
+
+<script src="js/sesion.js"></script>
+<script src="js/mis-ordenes.js"></script>
+<script src="js/chatbot.js"></script>
+</body>
+</html>
