@@ -39,10 +39,14 @@ async function enviarCorreo({ to, subject, html }) {
 router.get('/', async (req, res) => {
   try {
     const [ordenes] = await db.promise().query(
-      `SELECT o.*, GROUP_CONCAT(s.servicio SEPARATOR ', ') as servicios
+      `SELECT o.*, 
+              GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ', ') AS servicios,
+              c.estrellas,
+              c.comentario
        FROM ordenes o
        LEFT JOIN servicios_orden s ON s.orden_id = o.id
-       GROUP BY o.id
+       LEFT JOIN calificaciones c ON c.orden_id = o.id
+       GROUP BY o.id, c.estrellas, c.comentario
        ORDER BY o.created_at DESC`
     );
     res.json(ordenes);

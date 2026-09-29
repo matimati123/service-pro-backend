@@ -80,10 +80,40 @@ async function cargarDashboard() {
   }
 }
 
+function escapeHtml(texto) {
+  if (!texto) return '';
+  return String(texto)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function renderCalificacion(estrellas, comentario) {
+  if (!estrellas) {
+    return '<span style="color:#555; font-size:0.8rem;">Sin calificar</span>';
+  }
+  const cantidad = Number(estrellas) || 0;
+  const estrellasLlenas = '★'.repeat(cantidad);
+  const estrellasVacias = '☆'.repeat(Math.max(0, 5 - cantidad));
+  const comentarioEscapado = escapeHtml(comentario || '');
+
+  return `
+    <div class="calificacion-celda">
+      <div>
+        <span class="estrellas-rating">${estrellasLlenas}</span><span style="color:#444; font-size:0.95rem;">${estrellasVacias}</span>
+        <span style="font-size:0.75rem; color:var(--gris-texto); font-weight:600; margin-left:4px;">(${cantidad}/5)</span>
+      </div>
+      ${comentarioEscapado ? `<p class="comentario-preview" title="${comentarioEscapado}">💬 "${comentarioEscapado}"</p>` : ''}
+    </div>
+  `;
+}
+
 function renderTablaRecientes(ordenes) {
   const tbody = document.getElementById('body-recientes');
   if (!ordenes.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="tabla-loading">No hay órdenes aún.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="tabla-loading">No hay órdenes aún.</td></tr>';
     return;
   }
   tbody.innerHTML = ordenes.map(o => `
@@ -92,6 +122,7 @@ function renderTablaRecientes(ordenes) {
       <td>${o.cliente}</td>
       <td>${o.direccion}</td>
       <td><span class="estado-badge ${o.estado}">${o.estado}</span></td>
+      <td>${renderCalificacion(o.estrellas, o.comentario)}</td>
       <td>${new Date(o.created_at).toLocaleDateString('es-CL')}</td>
       <td>
         <button class="btn-tabla" onclick="abrirModalTecnico(${o.id})">Asignar</button>
@@ -128,7 +159,7 @@ async function cargarOrdenes() {
 function renderTablaOrdenes(ordenes) {
   const tbody = document.getElementById('body-ordenes');
   if (!ordenes.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="tabla-loading">No hay órdenes.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="tabla-loading">No hay órdenes.</td></tr>';
     return;
   }
   tbody.innerHTML = ordenes.map(o => `
@@ -139,6 +170,7 @@ function renderTablaOrdenes(ordenes) {
       <td>${o.servicios || '—'}</td>
       <td><span class="estado-badge ${o.estado}">${o.estado}</span></td>
       <td>${o.tecnico_nombre ? `👷 ${o.tecnico_nombre}` : '<span style="color:#555">Sin asignar</span>'}</td>
+      <td>${renderCalificacion(o.estrellas, o.comentario)}</td>
       <td>${new Date(o.created_at).toLocaleDateString('es-CL')}</td>
       <td>
         <button class="btn-tabla" onclick="abrirModalTecnico(${o.id})">Asignar</button>

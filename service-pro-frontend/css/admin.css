@@ -374,3 +374,38 @@ tr:hover td {
 .modal-btns .btn-secondary:hover {
   background: rgba(255,255,255,0.06);
 }
+
+/* =============================================
+   CALIFICACIONES EN TABLAS ADMIN
+   ============================================= */
+.calificacion-celda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+}
+
+.calificacion-celda .estrellas-rating {
+  color: var(--naranja);
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+}
+
+.calificacion-celda .comentario-preview {
+  font-size: 0.78rem;
+  color: var(--gris-texto);
+  font-style: italic;
+  margin: 2px 0 0 0;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.calificacion-celda .comentario-preview:hover {
+  color: var(--blanco);
+  white-space: normal;
+  word-break: break-word;
+}
