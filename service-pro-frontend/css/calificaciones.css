@@ -1,0 +1,119 @@
+/* =============================================
+   VOLTIA PRO SPA — Mis órdenes y calificaciones
+   Usa las variables definidas en styles.css
+   ============================================= */
+
+.ordenes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.ordenes-estado-msg {
+  text-align: center;
+  color: var(--gris-texto);
+  padding: 30px 0;
+}
+
+.orden-card {
+  background: var(--gris-oscuro);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.orden-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.orden-dato {
+  color: var(--gris-texto);
+  font-size: 0.92rem;
+}
+
+/* Badges de estado (mismos colores que el panel admin) */
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.estado-badge.pendiente  { background: rgba(249,115,22,0.15); color: #f97316; }
+.estado-badge.evaluada   { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+.estado-badge.cotizada   { background: rgba(168,85,247,0.15);  color: #a855f7; }
+.estado-badge.aprobada   { background: rgba(234,179,8,0.15);   color: #eab308; }
+.estado-badge.completado { background: rgba(34,197,94,0.15);   color: #22c55e; }
+.estado-badge.rechazada  { background: rgba(239,68,68,0.15);   color: #ef4444; }
+
+/* Bloque de calificación */
+.calificar-form,
+.calificada {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calificar-titulo {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.estrellas-input {
+  display: flex;
+  gap: 4px;
+}
+
+.estrella-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  color: #3a3a3a;
+  padding: 0 2px;
+  transition: color 0.15s, transform 0.15s;
+}
+.estrella-btn:hover { transform: scale(1.15); }
+.estrella-btn.llena { color: var(--naranja); }
+.estrella-btn:focus-visible { outline: 2px solid var(--naranja); border-radius: 4px; }
+
+.calificar-comentario {
+  width: 100%;
+  background: var(--gris-medio);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--blanco);
+  font-family: inherit;
+  font-size: 0.92rem;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.calificar-comentario:focus { outline: none; border-color: var(--naranja); }
+
+.calificar-form .btn { align-self: flex-start; }
+.calificar-form .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.estrellas-fijas { display: inline-flex; gap: 2px; }
+.estrellas-fijas .estrella { font-size: 1.4rem; color: #3a3a3a; }
+.estrellas-fijas .estrella.llena { color: var(--naranja); }
+
+.calificada-comentario {
+  color: var(--gris-texto);
+  font-size: 0.92rem;
+  font-style: italic;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .orden-card { padding: 16px; }
+  .estrella-btn { font-size: 1.8rem; }
+}

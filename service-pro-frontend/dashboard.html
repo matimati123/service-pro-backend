@@ -60,3 +60,39 @@
         </div>
       </div>
     </div>
+    <div class="flip-card">
+      <div class="flip-card-inner">
+        <div class="flip-card-front" style="background-image: url('images/servicio-alumbrado.jpg');">
+          <div class="flip-card-shade"></div>
+          <div class="flip-card-icon">💡</div>
+          <h3>Alumbrado</h3>
+        </div>
+        <div class="flip-card-back">
+          <div class="flip-card-icon">💡</div>
+          <h3>Alumbrado</h3>
+          <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
+          <a href="ordenes.html" class="btn">Solicitar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/chatbot.js"></script>
+<script>
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+  if (usuario && usuario.nombre) {
+    document.getElementById('nombre-usuario').textContent = usuario.nombre;
+    document.getElementById('nav-usuario').textContent = '👤 ' + usuario.nombre;
+  } else {
+    window.location.href = 'login.html';
+  }
+  function cerrarSesion() {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>
