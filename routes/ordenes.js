@@ -156,9 +156,53 @@ router.post('/', tokenOpcional, async (req, res) => {
       );
     }
 
-    // Avisar a n8n para que notifique por correo la nueva orden.
-    // Igual que con Resend: si esto falla, no debe romper la creación
-    // de la orden, que ya quedó guardada en la BD.
+    // Enviar notificación directa por correo con Resend
+    try {
+      await enviarCorreo({
+        to: process.env.GMAIL_USER || 'serviceprospa777@gmail.com',
+        subject: `⚡ Nueva orden recibida #${ordenId} — Voltia Pro SPA`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"></head>
+          <body>
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
+            <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
+            <h3 style="color: #333;">¡Nueva orden de servicio recibida!</h3>
+            <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Orden #:</td>
+                <td style="padding: 8px;">#${ordenId}</td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Cliente:</td>
+                <td style="padding: 8px;">${cliente}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Dirección:</td>
+                <td style="padding: 8px;">${direccion}</td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Servicios:</td>
+                <td style="padding: 8px;">${servicios.join(', ')}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; color: #555;">Observaciones:</td>
+                <td style="padding: 8px;">${observaciones || 'Sin observaciones'}</td>
+              </tr>
+            </table>
+            <p style="margin-top: 20px; color: #555; font-size: 13px;">Puedes gestionar esta orden desde el panel de administración.</p>
+            <p style="color: #999; font-size: 12px; margin-top: 10px;">Voltia Pro SPA — Sistema de Gestión</p>
+          </div>
+          </body>
+          </html>
+        `
+      });
+    } catch (mailErr) {
+      console.error('Error enviando correo con Resend (orden igual quedó guardada):', mailErr);
+    }
+
+    // Avisar a n8n como respaldo si el webhook está disponible
     try {
       await fetch('https://matimunoz123.app.n8n.cloud/webhook/d9fc9708-d939-4be2-9fbf-c320ff727618', {
         method: 'POST',
@@ -170,7 +214,7 @@ router.post('/', tokenOpcional, async (req, res) => {
         })
       });
     } catch (webhookErr) {
-      console.error('Error notificando a n8n (orden igual quedó creada):', webhookErr);
+      // Ignorar si n8n no está disponible
     }
 
     res.json({ ok: true, id: ordenId, mensaje: 'Orden creada correctamente.' });
