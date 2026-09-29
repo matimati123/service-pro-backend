@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Voltia Pro SPA</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/calificaciones.css">
 </head>
 <body>
 
@@ -12,10 +13,10 @@
   <h1><img src="images/logo.png" class="logo-img" alt="Logo"> Voltia Pro <span>SPA</span></h1>
   <nav>
     <a href="index.html">Inicio</a>
-    <a href="#">Servicios</a>
+    <a href="#historial">Mis órdenes</a>
+    <a href="#servicios">Servicios</a>
     <a href="contacto.html">Contacto</a>
     <a href="ayuda.html">Ayuda</a>
-    <a href="mis-ordenes.html">Mis órdenes</a>
     <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
     <a href="#" onclick="cerrarSesion()" class="nav-login">Cerrar sesión</a>
   </nav>
@@ -25,53 +26,101 @@
   <div class="page-header">
     <span class="hero-badge">⚡ Panel de Usuario</span>
     <h2>Bienvenido, <span id="nombre-usuario">Usuario</span></h2>
-    <p>Gestiona tus servicios eléctricos desde aquí.</p>
-    <a href="mis-ordenes.html" class="btn" style="display:inline-block; margin-top:14px;">Ver mis órdenes y calificar</a>
+    <p>Gestiona tus servicios eléctricos y revisa el historial de tus solicitudes.</p>
   </div>
 
-  <div class="cards">
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front" style="background-image: url('images/servicio-camaras.jpg');">
-          <div class="flip-card-shade"></div>
-          <div class="flip-card-icon">📷</div>
-          <h3>Instalación de Cámaras</h3>
-        </div>
-        <div class="flip-card-back">
-          <div class="flip-card-icon">📷</div>
-          <h3>Instalación de Cámaras</h3>
-          <p>Sistemas de seguridad y videovigilancia para tu hogar o negocio.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
-        </div>
+  <!-- Estadísticas del Cliente -->
+  <div class="usuario-stats">
+    <div class="usuario-stat-card azul">
+      <div class="usuario-stat-icon">📋</div>
+      <div class="usuario-stat-info">
+        <div class="num" id="stat-user-total">0</div>
+        <div class="label">Total Órdenes</div>
       </div>
     </div>
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front" style="background-image: url('images/servicio-enchufes.jpg');">
-          <div class="flip-card-shade"></div>
-          <div class="flip-card-icon">🔌</div>
-          <h3>Instalación de Enchufes</h3>
-        </div>
-        <div class="flip-card-back">
-          <div class="flip-card-icon">🔌</div>
-          <h3>Instalación de Enchufes</h3>
-          <p>Instalación y reparación de enchufes e interruptores certificados.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
-        </div>
+    <div class="usuario-stat-card naranja">
+      <div class="usuario-stat-icon">⏳</div>
+      <div class="usuario-stat-info">
+        <div class="num" id="stat-user-proceso">0</div>
+        <div class="label">En Proceso</div>
       </div>
     </div>
-    <div class="flip-card">
-      <div class="flip-card-inner">
-        <div class="flip-card-front" style="background-image: url('images/servicio-alumbrado.jpg');">
-          <div class="flip-card-shade"></div>
-          <div class="flip-card-icon">💡</div>
-          <h3>Alumbrado</h3>
+    <div class="usuario-stat-card verde">
+      <div class="usuario-stat-icon">✅</div>
+      <div class="usuario-stat-info">
+        <div class="num" id="stat-user-completadas">0</div>
+        <div class="label">Completadas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección: Historial de Órdenes Pasadas y Actuales -->
+  <div id="historial" class="dashboard-seccion-ordenes">
+    <div class="dashboard-seccion-header">
+      <h3><span>📦</span> Historial de Órdenes</h3>
+      <div class="filtros-ordenes">
+        <button class="filtro-btn active" data-filtro="todas">Todas</button>
+        <button class="filtro-btn" data-filtro="activas">En curso</button>
+        <button class="filtro-btn" data-filtro="completadas">Completadas</button>
+      </div>
+    </div>
+
+    <div id="historial-ordenes-lista">
+      <p class="ordenes-estado-msg">Cargando tus órdenes…</p>
+    </div>
+  </div>
+
+  <!-- Sección: Solicitar Nuevos Servicios -->
+  <div id="servicios">
+    <div class="seccion-servicios-titulo">
+      <h3><span>⚡</span> Solicitar Nuevo Servicio</h3>
+      <a href="ordenes.html" class="btn" style="padding: 8px 18px; font-size: 0.85rem;">Crear Solicitud</a>
+    </div>
+
+    <div class="cards">
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-card-front" style="background-image: url('images/servicio-camaras.jpg');">
+            <div class="flip-card-shade"></div>
+            <div class="flip-card-icon">📷</div>
+            <h3>Instalación de Cámaras</h3>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-icon">📷</div>
+            <h3>Instalación de Cámaras</h3>
+            <p>Sistemas de seguridad y videovigilancia para tu hogar o negocio.</p>
+            <a href="ordenes.html" class="btn">Solicitar</a>
+          </div>
         </div>
-        <div class="flip-card-back">
-          <div class="flip-card-icon">💡</div>
-          <h3>Alumbrado</h3>
-          <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
+      </div>
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-card-front" style="background-image: url('images/servicio-enchufes.jpg');">
+            <div class="flip-card-shade"></div>
+            <div class="flip-card-icon">🔌</div>
+            <h3>Instalación de Enchufes</h3>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-icon">🔌</div>
+            <h3>Instalación de Enchufes</h3>
+            <p>Instalación y reparación de enchufes e interruptores certificados.</p>
+            <a href="ordenes.html" class="btn">Solicitar</a>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-card-front" style="background-image: url('images/servicio-alumbrado.jpg');">
+            <div class="flip-card-shade"></div>
+            <div class="flip-card-icon">💡</div>
+            <h3>Alumbrado</h3>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-icon">💡</div>
+            <h3>Alumbrado</h3>
+            <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
+            <a href="ordenes.html" class="btn">Solicitar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -79,6 +128,7 @@
 </div>
 
 <script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
 <script src="js/chatbot.js"></script>
 <script>
   const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
