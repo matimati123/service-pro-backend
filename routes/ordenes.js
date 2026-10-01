@@ -86,6 +86,8 @@ function adjuntosDesdeFilas(filas) {
 }
 
 // GET /ordenes — obtener todas
+// (CAMBIO: ahora cada orden trae `comentarios_usuario`, con todos los
+// comentarios que ha dejado el cliente de esa orden)
 router.get('/', async (req, res) => {
   try {
     const [ordenes] = await db.promise().query(
@@ -100,6 +102,30 @@ router.get('/', async (req, res) => {
        GROUP BY o.id, c.estrellas, c.comentario
        ORDER BY o.created_at DESC`
     );
+
+    // Todos los comentarios, agrupados por usuario
+    const [comentarios] = await db.promise().query(
+      `SELECT usuario_id, orden_id, estrellas, comentario, created_at
+       FROM calificaciones
+       WHERE comentario IS NOT NULL AND comentario <> ''
+       ORDER BY created_at DESC`
+    );
+
+    const porUsuario = new Map();
+    for (const c of comentarios) {
+      if (!porUsuario.has(c.usuario_id)) porUsuario.set(c.usuario_id, []);
+      porUsuario.get(c.usuario_id).push({
+        orden_id: c.orden_id,
+        estrellas: c.estrellas,
+        comentario: c.comentario,
+        created_at: c.created_at
+      });
+    }
+
+    for (const o of ordenes) {
+      o.comentarios_usuario = porUsuario.get(o.usuario_id) || [];
+    }
+
     res.json(ordenes);
   } catch (err) {
     console.error(err);
