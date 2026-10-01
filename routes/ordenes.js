@@ -12,7 +12,7 @@ const { verificarToken, tokenOpcional } = require('../middleware/auth');
 // Usamos fetch a la API de Resend en vez de Nodemailer/SMTP,
 // porque Render (plan gratis) bloquea las conexiones SMTP salientes.
 // =============================================
-async function enviarCorreo({ to, subject, html }) {
+async function enviarCorreo({ to, subject, html, attachments }) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -23,7 +23,8 @@ async function enviarCorreo({ to, subject, html }) {
       from: 'Voltia Pro SPA <onboarding@resend.dev>',
       to,
       subject,
-      html
+      html,
+      ...(attachments && attachments.length ? { attachments } : {})
     })
   });
 
@@ -35,6 +36,55 @@ async function enviarCorreo({ to, subject, html }) {
   return res.json();
 }
 
+// =============================================
+// FOTOS DEL PROBLEMA
+// El navegador las comprime y las manda como data URL (base64) dentro del
+// POST /ordenes. Aquí se validan de verdad (tipo, firma del archivo y tamaño):
+// nunca confiamos en lo que diga el cliente.
+// =============================================
+const MAX_FOTOS = 4;
+const MAX_BYTES_FOTO = 1.5 * 1024 * 1024; // 1.5 MB por foto, ya decodificada
+
+// Firmas (magic bytes) de los formatos permitidos
+function detectarMime(buf) {
+  if (buf.length > 3 && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return 'image/jpeg';
+  if (buf.length > 8 && buf.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))) return 'image/png';
+  if (buf.length > 12 && buf.slice(0, 4).toString('ascii') === 'RIFF' && buf.slice(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
+  return null;
+}
+
+// Devuelve [{ mime, datos }] o lanza un Error con .status = 400
+function procesarFotos(fotos) {
+  if (fotos === undefined || fotos === null) return [];
+
+  const fallo = (msg) => { const e = new Error(msg); e.status = 400; return e; };
+
+  if (!Array.isArray(fotos)) throw fallo('El formato de las fotos no es válido.');
+  if (fotos.length > MAX_FOTOS) throw fallo(`Puedes adjuntar hasta ${MAX_FOTOS} fotos.`);
+
+  return fotos.map((foto, i) => {
+    const m = typeof foto === 'string' && foto.match(/^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/);
+    if (!m) throw fallo(`La foto ${i + 1} no es válida. Usa imágenes JPG, PNG o WEBP.`);
+
+    const datos = Buffer.from(m[1], 'base64');
+    if (datos.length > MAX_BYTES_FOTO) throw fallo(`La foto ${i + 1} es demasiado pesada (máximo 1.5 MB).`);
+
+    const mime = detectarMime(datos);
+    if (!mime) throw fallo(`La foto ${i + 1} no es una imagen válida.`);
+
+    return { mime, datos };
+  });
+}
+
+// Adjuntos para Resend: [{ filename, content (base64) }]
+function adjuntosDesdeFilas(filas) {
+  const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+  return filas.map((f, i) => ({
+    filename: `foto-${i + 1}.${ext[f.mime] || 'jpg'}`,
+    content: Buffer.from(f.datos).toString('base64')
+  }));
+}
+
 // GET /ordenes — obtener todas
 router.get('/', async (req, res) => {
   try {
@@ -42,7 +92,8 @@ router.get('/', async (req, res) => {
       `SELECT o.*, 
               GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ', ') AS servicios,
               c.estrellas,
-              c.comentario
+              c.comentario,
+              (SELECT COUNT(*) FROM fotos_orden f WHERE f.orden_id = o.id) AS total_fotos
        FROM ordenes o
        LEFT JOIN servicios_orden s ON s.orden_id = o.id
        LEFT JOIN calificaciones c ON c.orden_id = o.id
@@ -63,7 +114,8 @@ router.get('/mias', verificarToken, async (req, res) => {
     const [ordenes] = await db.promise().query(
       `SELECT o.id, o.direccion, o.estado, o.created_at,
               GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ', ') AS servicios,
-              c.estrellas, c.comentario
+              c.estrellas, c.comentario,
+              (SELECT COUNT(*) FROM fotos_orden f WHERE f.orden_id = o.id) AS total_fotos
        FROM ordenes o
        LEFT JOIN servicios_orden s ON s.orden_id = o.id
        LEFT JOIN calificaciones c ON c.orden_id = o.id
@@ -119,6 +171,39 @@ router.post('/:id/calificacion', verificarToken, async (req, res) => {
   }
 });
 
+// GET /ordenes/:id/fotos — fotos de una orden (como data URL, listas para un <img>)
+// Pueden verlas: el admin, el dueño de la orden y el técnico asignado.
+router.get('/:id/fotos', verificarToken, async (req, res) => {
+  try {
+    const [ordenes] = await db.promise().query(
+      'SELECT id, usuario_id, tecnico_email FROM ordenes WHERE id = ?', [req.params.id]
+    );
+    if (!ordenes.length) return res.status(404).json({ error: 'Orden no encontrada.' });
+    const orden = ordenes[0];
+
+    const esAdmin = req.user.rol === 'admin';
+    const esDueno = orden.usuario_id !== null && orden.usuario_id === req.user.id;
+    const esTecnico = req.user.rol === 'tecnico' && !!orden.tecnico_email &&
+      orden.tecnico_email.toLowerCase() === String(req.user.email || '').toLowerCase();
+
+    if (!esAdmin && !esDueno && !esTecnico) {
+      return res.status(403).json({ error: 'No tienes permiso para ver estas fotos.' });
+    }
+
+    const [fotos] = await db.promise().query(
+      'SELECT id, mime, datos FROM fotos_orden WHERE orden_id = ? ORDER BY id', [orden.id]
+    );
+    res.json(fotos.map(f => ({
+      id: f.id,
+      mime: f.mime,
+      data: `data:${f.mime};base64,${Buffer.from(f.datos).toString('base64')}`
+    })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener las fotos.' });
+  }
+});
+
 // GET /ordenes/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -134,10 +219,18 @@ router.get('/:id', async (req, res) => {
 
 // POST /ordenes — crear orden
 router.post('/', tokenOpcional, async (req, res) => {
-  const { cliente, direccion, servicios, observaciones } = req.body;
+  const { cliente, direccion, servicios, observaciones, fotos } = req.body;
 
   if (!cliente || !direccion || !servicios || servicios.length === 0) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' });
+  }
+
+  // Validar las fotos ANTES de crear nada: si alguna es inválida no queda una orden a medias
+  let fotosValidas;
+  try {
+    fotosValidas = procesarFotos(fotos);
+  } catch (err) {
+    return res.status(err.status || 400).json({ error: err.message });
   }
 
   try {
@@ -156,9 +249,24 @@ router.post('/', tokenOpcional, async (req, res) => {
       );
     }
 
+    // Guardar las fotos. Si esto falla, la orden igual queda creada.
+    let fotosGuardadas = 0;
+    if (fotosValidas.length) {
+      try {
+        await db.promise().query(
+          'INSERT INTO fotos_orden (orden_id, mime, tamano, datos) VALUES ?',
+          [fotosValidas.map(f => [ordenId, f.mime, f.datos.length, f.datos])]
+        );
+        fotosGuardadas = fotosValidas.length;
+      } catch (fotoErr) {
+        console.error('Error guardando fotos (orden igual quedó creada):', fotoErr);
+      }
+    }
+
     // Enviar notificación directa por correo con Resend
     try {
       await enviarCorreo({
+        attachments: fotosGuardadas ? adjuntosDesdeFilas(fotosValidas) : undefined,
         to: process.env.GMAIL_USER || 'serviceprospa777@gmail.com',
         subject: `⚡ Nueva orden recibida #${ordenId} — Voltia Pro SPA`,
         html: `
@@ -190,6 +298,10 @@ router.post('/', tokenOpcional, async (req, res) => {
                 <td style="padding: 8px; font-weight: bold; color: #555;">Observaciones:</td>
                 <td style="padding: 8px;">${observaciones || 'Sin observaciones'}</td>
               </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Fotos:</td>
+                <td style="padding: 8px;">${fotosGuardadas ? `📷 ${fotosGuardadas} adjunta${fotosGuardadas > 1 ? 's' : ''} a este correo` : 'Sin fotos'}</td>
+              </tr>
             </table>
             <p style="margin-top: 20px; color: #555; font-size: 13px;">Puedes gestionar esta orden desde el panel de administración.</p>
             <p style="color: #999; font-size: 12px; margin-top: 10px;">Voltia Pro SPA — Sistema de Gestión</p>
@@ -217,7 +329,12 @@ router.post('/', tokenOpcional, async (req, res) => {
       // Ignorar si n8n no está disponible
     }
 
-    res.json({ ok: true, id: ordenId, mensaje: 'Orden creada correctamente.' });
+    res.json({
+      ok: true,
+      id: ordenId,
+      fotos_guardadas: fotosGuardadas,
+      mensaje: 'Orden creada correctamente.'
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al crear la orden.' });
@@ -272,11 +389,23 @@ router.put('/:id/asignar', async (req, res) => {
       [tecnico_nombre, tecnico_email, 'evaluada', req.params.id]
     );
 
+    // Fotos del problema, para que el técnico llegue mejor preparado
+    let adjuntos = [];
+    try {
+      const [fotos] = await db.promise().query(
+        'SELECT mime, datos FROM fotos_orden WHERE orden_id = ? ORDER BY id', [orden.id]
+      );
+      adjuntos = adjuntosDesdeFilas(fotos);
+    } catch (fotoErr) {
+      console.error('No se pudieron leer las fotos para el correo del técnico:', fotoErr);
+    }
+
     // Enviar mail al técnico (Resend)
     // Nota: en el plan gratis de Resend sin dominio verificado, esto solo
     // funciona si tecnico_email es la misma cuenta con la que te registraste.
     try {
       await enviarCorreo({
+        attachments: adjuntos,
         to: tecnico_email,
         subject: `⚡ Nueva orden asignada #${orden.id} — Voltia Pro SPA`,
         html: `
@@ -307,6 +436,10 @@ router.put('/:id/asignar', async (req, res) => {
               <tr>
                 <td style="padding: 8px; font-weight: bold; color: #555;">Observaciones:</td>
                 <td style="padding: 8px;">${orden.observaciones || 'Sin observaciones'}</td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding: 8px; font-weight: bold; color: #555;">Fotos:</td>
+                <td style="padding: 8px;">${adjuntos.length ? `📷 ${adjuntos.length} foto${adjuntos.length > 1 ? 's' : ''} del problema adjunta${adjuntos.length > 1 ? 's' : ''} a este correo` : 'El cliente no adjuntó fotos'}</td>
               </tr>
             </table>
             <p style="margin-top: 20px; color: #333;">Por favor dirígete a la dirección indicada para evaluar el trabajo.</p>

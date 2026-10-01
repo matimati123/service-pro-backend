@@ -96,6 +96,9 @@ app.use('/users/login', limiterLogin);
 // MIDDLEWARES ESTÁNDAR
 // =============================================
 app.use(logger('dev'));
+// Crear una orden puede traer hasta 4 fotos en base64 (ya comprimidas en el navegador).
+// Este parser va ANTES del global y solo aplica a POST /ordenes; el resto sigue con 100kb.
+app.post('/ordenes', express.json({ limit: '8mb' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
