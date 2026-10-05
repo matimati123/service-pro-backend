@@ -42,7 +42,7 @@ async function enviarCorreo({ to, subject, html, attachments }) {
 // POST /ordenes. Aquí se validan de verdad (tipo, firma del archivo y tamaño):
 // nunca confiamos en lo que diga el cliente.
 // =============================================
-const MAX_FOTOS = 4;
+const MAX_FOTOS = 3;
 const MAX_BYTES_FOTO = 1.5 * 1024 * 1024; // 1.5 MB por foto, ya decodificada
 
 // Firmas (magic bytes) de los formatos permitidos
