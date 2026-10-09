@@ -36,6 +36,15 @@ async function enviarCorreo({ to, subject, html, attachments }) {
   return res.json();
 }
 
+// Normaliza un celular chileno a formato internacional sin "+" (ej: 56912345678).
+// Acepta "+56 9 1234 5678", "56912345678", "9 1234 5678" o "912345678".
+// Devuelve null si no es válido.
+function normalizarTelefonoCL(valor) {
+  let digitos = String(valor || '').replace(/\D/g, '');
+  if (digitos.length === 9 && digitos.startsWith('9')) digitos = '56' + digitos;
+  return /^569\d{8}$/.test(digitos) ? digitos : null;
+}
+
 // =============================================
 // FOTOS DEL PROBLEMA
 // El navegador las comprime y las manda como data URL (base64) dentro del
@@ -86,7 +95,7 @@ function adjuntosDesdeFilas(filas) {
 }
 
 // GET /ordenes — obtener todas
-// (CAMBIO: ahora cada orden trae `comentarios_usuario`, con todos los
+// (cada orden trae `comentarios_usuario`, con todos los
 // comentarios que ha dejado el cliente de esa orden)
 router.get('/', async (req, res) => {
   try {
@@ -134,11 +143,12 @@ router.get('/', async (req, res) => {
 });
 
 // GET /ordenes/mias — órdenes del usuario logueado, con su calificación
+// y el técnico asignado (con su WhatsApp, para el botón del panel del cliente)
 // (va ANTES de /:id, si no "mias" se interpretaría como un id)
 router.get('/mias', verificarToken, async (req, res) => {
   try {
     const [ordenes] = await db.promise().query(
-      `SELECT o.id, o.direccion, o.estado, o.created_at,
+      `SELECT o.id, o.direccion, o.estado, o.created_at, o.tecnico_nombre, o.tecnico_telefono,
               GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ', ') AS servicios,
               c.estrellas, c.comentario,
               (SELECT COUNT(*) FROM fotos_orden f WHERE f.orden_id = o.id) AS total_fotos
@@ -387,12 +397,17 @@ router.put('/:id/estado', async (req, res) => {
   }
 });
 
-// PUT /ordenes/:id/asignar — asignar técnico y notificar por mail
+// PUT /ordenes/:id/asignar — asignar técnico (con su WhatsApp) y notificar por mail
 router.put('/:id/asignar', async (req, res) => {
-  const { tecnico_nombre, tecnico_email } = req.body;
+  const { tecnico_nombre, tecnico_email, tecnico_telefono } = req.body;
 
   if (!tecnico_nombre || !tecnico_email) {
     return res.status(400).json({ error: 'Nombre y email del técnico son obligatorios.' });
+  }
+
+  const telefonoTecnico = normalizarTelefonoCL(tecnico_telefono);
+  if (!telefonoTecnico) {
+    return res.status(400).json({ error: 'El WhatsApp del técnico es obligatorio (ej: +56 9 1234 5678).' });
   }
 
   try {
@@ -411,8 +426,8 @@ router.put('/:id/asignar', async (req, res) => {
 
     // Actualizar técnico en la orden
     await db.promise().query(
-      'UPDATE ordenes SET tecnico_nombre = ?, tecnico_email = ?, estado = ? WHERE id = ?',
-      [tecnico_nombre, tecnico_email, 'evaluada', req.params.id]
+      'UPDATE ordenes SET tecnico_nombre = ?, tecnico_email = ?, tecnico_telefono = ?, estado = ? WHERE id = ?',
+      [tecnico_nombre, tecnico_email, telefonoTecnico, 'evaluada', req.params.id]
     );
 
     // Fotos del problema, para que el técnico llegue mejor preparado
