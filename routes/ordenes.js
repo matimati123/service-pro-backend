@@ -167,6 +167,65 @@ router.get('/mias', verificarToken, async (req, res) => {
   }
 });
 
+// GET /ordenes/ventas — resumen de ventas por mes (solo admin)
+// (va ANTES de /:id, si no "ventas" se interpretaría como un id)
+router.get('/ventas', verificarToken, async (req, res) => {
+  if (req.user.rol !== 'admin') {
+    return res.status(403).json({ error: 'Solo el administrador puede ver las ventas.' });
+  }
+
+  try {
+    // Resumen por mes (el mes es el de la fecha en que se creó la solicitud)
+    const [meses] = await db.promise().query(
+      `SELECT DATE_FORMAT(created_at, '%Y-%m') AS mes,
+              COUNT(*) AS total,
+              SUM(estado = 'completado') AS completadas,
+              SUM(estado = 'rechazada') AS rechazadas,
+              SUM(estado NOT IN ('completado', 'rechazada')) AS en_proceso
+       FROM ordenes
+       WHERE created_at IS NOT NULL
+       GROUP BY mes
+       ORDER BY mes DESC
+       LIMIT 24`
+    );
+
+    // Desglose por servicio (una orden con varios servicios cuenta en cada uno)
+    const [servicios] = await db.promise().query(
+      `SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS mes,
+              s.servicio,
+              COUNT(*) AS total,
+              SUM(o.estado = 'completado') AS completadas,
+              SUM(o.estado = 'rechazada') AS rechazadas
+       FROM ordenes o
+       JOIN servicios_orden s ON s.orden_id = o.id
+       WHERE o.created_at IS NOT NULL
+       GROUP BY mes, s.servicio
+       ORDER BY mes DESC, s.servicio`
+    );
+
+    const num = (v) => Number(v) || 0;
+    res.json({
+      meses: meses.map(m => ({
+        mes: m.mes,
+        total: num(m.total),
+        completadas: num(m.completadas),
+        rechazadas: num(m.rechazadas),
+        en_proceso: num(m.en_proceso)
+      })),
+      servicios: servicios.map(s => ({
+        mes: s.mes,
+        servicio: s.servicio,
+        total: num(s.total),
+        completadas: num(s.completadas),
+        rechazadas: num(s.rechazadas)
+      }))
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener las ventas.' });
+  }
+});
+
 // POST /ordenes/:id/calificacion — calificar una orden completada
 router.post('/:id/calificacion', verificarToken, async (req, res) => {
   const estrellas = Number(req.body.estrellas);
