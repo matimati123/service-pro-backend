@@ -1537,3 +1537,84 @@ header h1 span {
     font-size: 0.85rem;
   }
 }
+
+/* =============================================
+   FOTOS DEL PROBLEMA (formulario de orden)
+   ============================================= */
+
+.btn-fotos {
+  align-self: flex-start;
+  padding: 11px 18px;
+  background: transparent;
+  color: var(--naranja);
+  border: 1px dashed rgba(249,115,22,0.5);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-fotos:hover:not(:disabled) {
+  background: rgba(249,115,22,0.1);
+}
+
+.btn-fotos:disabled {
+  color: var(--gris-texto);
+  border-color: var(--borde);
+  cursor: not-allowed;
+}
+
+.fotos-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.fotos-previews:empty {
+  display: none;
+}
+
+.foto-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  background: var(--gris-medio);
+}
+
+.foto-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.foto-quitar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.75);
+  color: var(--blanco);
+  font-size: 0.75rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.foto-quitar:hover {
+  background: #ef4444;
+}
+
+.foto-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gris-texto);
+  font-size: 0.75rem;
+}

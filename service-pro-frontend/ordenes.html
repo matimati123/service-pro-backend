@@ -98,13 +98,84 @@
     <textarea id="observaciones" placeholder="Describe brevemente lo que necesitas o el problema que tienes..." rows="4"></textarea>
   </div>
 
-  <button class="btn" onclick="crearOrden()">Enviar Solicitud</button>
+  <div class="form-group">
+    <label>📷 Fotos del problema <span style="color:#a0a0a0; font-weight:400;">(opcional)</span></label>
+    <p class="subtitulo-form">Una foto del tablero, del enchufe dañado o de la zona a instalar ayuda a que el técnico llegue preparado. Hasta 3 fotos.</p>
+    <input type="file" id="input-fotos" accept="image/*" multiple hidden>
+    <button type="button" class="btn-fotos" id="btn-agregar-fotos">＋ Agregar fotos (0/3)</button>
+    <div id="fotos-previews" class="fotos-previews"></div>
+    <span id="error-fotos" class="input-error"></span>
+  </div>
+
+  <button class="btn" id="btn-enviar" onclick="crearOrden()">Enviar Solicitud</button>
 </div>
 
 <script src="js/app.js"></script>
+<script src="js/fotos.js"></script>
 <script src="js/sesion.js"></script>
 <script src="js/chatbot.js"></script>
+<script src="js/menu-movil.js"></script>
 <script>
+  // Servicio elegido en la página anterior (?servicio=alumbrado)
+  const SERVICIOS_VALIDOS = ['camara', 'enchufe', 'alumbrado'];
+  const servicioElegido = new URLSearchParams(window.location.search).get('servicio');
+
+  // Marca la tarjeta del servicio elegido (los demás siguen disponibles)
+  function marcarServicio(valor) {
+    document.querySelectorAll('.servicios-check input[type="checkbox"]').forEach(cb => {
+      if (cb.value === valor) {
+        cb.checked = true;
+        toggleCard(cb);
+      }
+    });
+  }
+
+  function preseleccionarServicio() {
+    let servicio = servicioElegido;
+
+    // Si venía del login, el servicio quedó guardado (vale 10 minutos)
+    if (!servicio) {
+      try {
+        const guardado = JSON.parse(localStorage.getItem('servicio_pre') || 'null');
+        if (guardado && Date.now() - guardado.t < 10 * 60 * 1000) servicio = guardado.servicio;
+      } catch (e) { /* si falla, no se preselecciona nada */ }
+    }
+    localStorage.removeItem('servicio_pre');
+
+    if (SERVICIOS_VALIDOS.includes(servicio)) marcarServicio(servicio);
+  }
+
+  // 1) Solo con sesión iniciada: si no hay, va al login y vuelve aquí después
+  if (!tokenValido()) {
+    localStorage.setItem('volver_a', 'ordenes.html');
+    if (SERVICIOS_VALIDOS.includes(servicioElegido)) {
+      localStorage.setItem('servicio_pre', JSON.stringify({ servicio: servicioElegido, t: Date.now() }));
+    }
+    window.location.replace('login.html?aviso=solicitar');
+  } else {
+    preseleccionarServicio();
+  }
+
+  // 2) Autocompletar: nombre desde la cuenta y dirección desde su última orden
+  (function autocompletar() {
+    const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+    const inputNombre = document.getElementById('cliente');
+    if (usuario.nombre && !inputNombre.value) inputNombre.value = usuario.nombre;
+
+    const token = sessionStorage.getItem('token');
+    if (!token) return;
+    fetch('https://service-pro-backend-u3wn.onrender.com/ordenes/mias', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.ok ? res.json() : [])
+      .then(ordenes => {
+        const inputDir = document.getElementById('direccion');
+        const ultima = Array.isArray(ordenes) ? ordenes.find(o => o.direccion) : null;
+        if (ultima && !inputDir.value) inputDir.value = ultima.direccion;
+      })
+      .catch(() => { /* si falla, la persona escribe su dirección */ });
+  })();
+
   const hoy = new Date();
   hoy.setDate(hoy.getDate() + 1);
   document.getElementById('fecha-visita').min = hoy.toISOString().split('T')[0];

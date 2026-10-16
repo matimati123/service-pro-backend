@@ -28,9 +28,15 @@
       const payload = JSON.parse(jsonPayload);
       sessionStorage.setItem('usuario', JSON.stringify(payload));
 
+      // ¿Venía desde "Solicitar servicio"? Entonces vuelve al formulario
+      const volver = localStorage.getItem('volver_a');
+      localStorage.removeItem('volver_a');
+
       // Redirigir según el rol
       if (payload.rol === 'admin') {
         window.location.href = 'admin.html';
+      } else if (volver === 'ordenes.html') {
+        window.location.href = 'ordenes.html';
       } else {
         window.location.href = 'dashboard.html';
       }

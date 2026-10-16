@@ -278,4 +278,34 @@
   .usuario-stats {
     grid-template-columns: 1fr;
   }
-}
+}
+
+/* =============================================
+   WHATSAPP CON EL TÉCNICO (tarjeta de orden)
+   ============================================= */
+.orden-tecnico {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 9px 16px;
+  background: #25d366;
+  color: #06210f;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 0.2s;
+}
+
+.btn-whatsapp:hover {
+  filter: brightness(1.08);
+}

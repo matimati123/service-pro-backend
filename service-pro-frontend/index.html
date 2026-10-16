@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voltia Pro SPA</title>
+  <title>Voltia Pro SPA — Servicios Eléctricos Profesionales</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/carrusel.css">
 </head>
 <body>
 
@@ -17,7 +18,8 @@
   <!-- Menú normal (desktop) -->
   <nav id="nav-menu">
     <a href="index.html">Inicio</a>
-    <a href="#">Servicios</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#galeria-trabajos">Instalaciones</a>
     <a href="contacto.html">Contacto</a>
     <a href="ayuda.html">Ayuda</a>
     <span id="nav-usuario" style="color:#a0a0a0; font-size:0.9rem; padding:8px 12px;"></span>
@@ -41,7 +43,8 @@
   </div>
 </section>
 
-<section class="servicios">
+<!-- SECCIÓN SERVICIOS -->
+<section id="servicios" class="servicios">
   <h2>Nuestros Servicios</h2>
   <p class="subtitulo">Soluciones eléctricas para cada necesidad</p>
   <div class="cards">
@@ -56,7 +59,7 @@
           <div class="flip-card-icon">📷</div>
           <h3>Instalación de Cámaras</h3>
           <p>Sistemas de seguridad y videovigilancia para tu hogar o negocio.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
+          <a href="ordenes.html?servicio=camara" class="btn">Solicitar</a>
         </div>
       </div>
     </div>
@@ -71,7 +74,7 @@
           <div class="flip-card-icon">🔌</div>
           <h3>Instalación de Enchufes</h3>
           <p>Instalación y reparación de enchufes e interruptores certificados.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
+          <a href="ordenes.html?servicio=enchufe" class="btn">Solicitar</a>
         </div>
       </div>
     </div>
@@ -86,15 +89,148 @@
           <div class="flip-card-icon">💡</div>
           <h3>Alumbrado</h3>
           <p>Diseño e instalación de sistemas de iluminación interior y exterior.</p>
-          <a href="ordenes.html" class="btn">Solicitar</a>
+          <a href="ordenes.html?servicio=alumbrado" class="btn">Solicitar</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- =============================================
+     PARTE INFERIOR: CARRUSEL DE INSTALACIONES Y REPARACIONES
+     ============================================= -->
+<section id="galeria-trabajos" class="galeria-section">
+  <div class="galeria-header-wrap">
+    <span class="hero-badge">⚡ Trabajos & Proyectos</span>
+    <h2>Nuevas <span>Instalaciones</span> y Reparaciones</h2>
+    <p>Conoce los proyectos y reparaciones eléctricas realizadas por nuestro equipo o comparte las fotos de tu nueva instalación.</p>
+    
+    <div class="galeria-acciones">
+      <button class="btn-subir-foto" onclick="abrirModalSubirFoto()">
+        <span>📸</span> Compartir mi Instalación / Reparación
+      </button>
+    </div>
+
+    <!-- Filtros de Categoría -->
+    <div class="galeria-filtros">
+      <button class="filtro-carrusel-btn active" data-categoria="todos">Todos los trabajos</button>
+      <button class="filtro-carrusel-btn" data-categoria="instalacion">Instalaciones</button>
+      <button class="filtro-carrusel-btn" data-categoria="reparacion">Reparaciones</button>
+      <button class="filtro-carrusel-btn" data-categoria="iluminacion">Iluminación</button>
+      <button class="filtro-carrusel-btn" data-categoria="camaras">Cámaras</button>
+    </div>
+  </div>
+
+  <!-- Carrusel con Navegación -->
+  <div class="carrusel-wrapper">
+    <button class="carrusel-btn prev" id="carrusel-prev" aria-label="Anterior">‹</button>
+    <div class="carrusel-track" id="carrusel-track">
+      <!-- Tarjetas inyectadas dinámicamente por carrusel.js -->
+    </div>
+    <button class="carrusel-btn next" id="carrusel-next" aria-label="Siguiente">›</button>
+  </div>
+
+  <!-- Indicadores de posición (Dots) -->
+  <div class="carrusel-dots" id="carrusel-dots"></div>
+</section>
+
+<!-- Footer profesional -->
+<footer style="background:#0c0c0c; border-top:1px solid var(--borde); padding:40px 20px; text-align:center; color:var(--gris-texto); font-size:0.9rem;">
+  <div style="max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="images/logo.png" alt="Logo" style="width:36px; height:36px; border-radius:50%;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:1px; color:#fff;">Voltia Pro <strong style="color:var(--naranja);">SPA</strong></span>
+    </div>
+    <div style="display:flex; gap:20px; font-size:0.85rem;">
+      <a href="index.html" style="color:var(--gris-texto); text-decoration:none;">Inicio</a>
+      <a href="#servicios" style="color:var(--gris-texto); text-decoration:none;">Servicios</a>
+      <a href="#galeria-trabajos" style="color:var(--gris-texto); text-decoration:none;">Instalaciones</a>
+      <a href="contacto.html" style="color:var(--gris-texto); text-decoration:none;">Contacto</a>
+      <a href="ayuda.html" style="color:var(--gris-texto); text-decoration:none;">Ayuda</a>
+    </div>
+    <p style="margin:0; font-size:0.82rem;">&copy; 2026 Voltia Pro SPA — Servicios Eléctricos Certificados.</p>
+  </div>
+</footer>
+
+<!-- Modal Subir Foto -->
+<div id="modal-subir-foto" class="modal-overlay" onclick="if(event.target === this) cerrarModalSubirFoto()">
+  <div class="modal-content-carrusel">
+    <button class="modal-close-btn" onclick="cerrarModalSubirFoto()" aria-label="Cerrar">&times;</button>
+    <div class="modal-header-carrusel">
+      <h3><span>📸</span> Publicar en el Carrusel</h3>
+      <p>Comparte una foto de tu nueva instalación o reparación eléctrica.</p>
+    </div>
+
+    <form id="form-subir-foto">
+      <!-- Dropzone Drag & Drop -->
+      <div id="dropzone-upload" class="dropzone-upload">
+        <input type="file" id="foto-input-file" accept="image/png, image/jpeg, image/webp" style="display:none;">
+        <div id="dropzone-prompt">
+          <div class="dropzone-icon">📁</div>
+          <div class="dropzone-text">Haz clic o arrastra aquí tu foto</div>
+          <div class="dropzone-subtext">Formatos permitidos: JPG, PNG, WEBP (hasta 6MB)</div>
+        </div>
+        <img id="dropzone-preview" class="dropzone-preview" alt="Vista previa">
+      </div>
+
+      <div class="form-group-carrusel">
+        <label for="foto-titulo">Título del Trabajo *</label>
+        <input type="text" id="foto-titulo" class="form-control-carrusel" placeholder="Ej: Nueva instalación de tablero con diferenciales" required maxlength="80">
+      </div>
+
+      <div class="form-group-carrusel">
+        <label for="foto-categoria">Categoría *</label>
+        <select id="foto-categoria" class="form-control-carrusel" required>
+          <option value="instalacion">Instalación Eléctrica</option>
+          <option value="reparacion">Reparación / Mantenimiento</option>
+          <option value="iluminacion">Iluminación / LED</option>
+          <option value="camaras">Cámaras y Seguridad</option>
+          <option value="comunidad">Comunidad / Proyecto</option>
+        </select>
+      </div>
+
+      <div class="form-group-carrusel">
+        <label for="foto-descripcion">Descripción del Trabajo</label>
+        <textarea id="foto-descripcion" class="form-control-carrusel" rows="3" placeholder="Cuéntanos brevemente qué se instaló o reparó..." maxlength="300"></textarea>
+      </div>
+
+      <div class="form-group-carrusel">
+        <label for="foto-autor">Tu Nombre / Técnico (opcional)</label>
+        <input type="text" id="foto-autor" class="form-control-carrusel" placeholder="Ej: Juan Pérez" maxlength="50">
+      </div>
+
+      <div class="modal-actions-carrusel">
+        <button type="button" class="btn-cancelar" onclick="cerrarModalSubirFoto()">Cancelar</button>
+        <button type="submit" class="btn">Publicar en el carrusel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Lightbox (Visualizador Ampliado) -->
+<div id="lightbox-modal" class="lightbox-modal" onclick="cerrarLightbox()">
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <div class="lightbox-img-wrap">
+      <img id="lightbox-img" src="" alt="Ampliación">
+    </div>
+    <div class="lightbox-info">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span id="lightbox-categoria" class="carrusel-badge instalacion" style="position:static;">Categoría</span>
+        <button onclick="cerrarLightbox()" style="background:none; border:none; color:#bbb; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <h3 id="lightbox-titulo">Título del Trabajo</h3>
+      <p id="lightbox-desc">Descripción detallada</p>
+      <div class="lightbox-meta">
+        <span id="lightbox-autor">Por Autor</span>
+        <span id="lightbox-fecha">Fecha</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="js/app.js"></script>
 <script src="js/sesion.js"></script>
+<script src="js/carrusel.js"></script>
 <script src="js/chatbot.js"></script>
 <script>
   function toggleMenu() {

@@ -95,6 +95,20 @@ function crearOrden() {
   const direccion = document.getElementById('direccion').value.trim();
   const observaciones = document.getElementById('observaciones')?.value.trim() || '';
 
+  // Fotos del problema (opcionales); esperamos si alguna aún se está comprimiendo
+  if (typeof fotosEstanProcesando === 'function' && fotosEstanProcesando()) {
+    const errorFotos = document.getElementById('error-fotos');
+    if (errorFotos) errorFotos.textContent = 'Espera a que terminen de procesarse las fotos.';
+    return;
+  }
+  const fotos = typeof obtenerFotosParaEnviar === 'function' ? obtenerFotosParaEnviar() : [];
+
+  // Evitar doble envío (subir fotos puede tardar unos segundos)
+  const btnEnviar = document.getElementById('btn-enviar');
+  const textoBtn = btnEnviar ? btnEnviar.textContent : '';
+  if (btnEnviar) { btnEnviar.disabled = true; btnEnviar.textContent = fotos.length ? 'Enviando fotos…' : 'Enviando…'; }
+  const restaurarBtn = () => { if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.textContent = textoBtn; } };
+
   // Si hay sesión iniciada, mandamos el token para que la orden quede a nombre del usuario
   const token = sessionStorage.getItem('token');
   const headers = { 'Content-Type': 'application/json' };
@@ -103,17 +117,36 @@ function crearOrden() {
   fetch('https://service-pro-backend-u3wn.onrender.com/ordenes', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ cliente, direccion, servicios, observaciones, fecha_visita: fecha, hora_visita: hora })
+    body: JSON.stringify({ cliente, direccion, servicios, observaciones, fotos, fecha_visita: fecha, hora_visita: hora })
   })
-  .then(res => res.json())
-  .then(data => {
-    alert('✅ Solicitud enviada correctamente. Nos contactaremos contigo a la brevedad.');
+  .then(async res => ({ ok: res.ok, data: await res.json().catch(() => ({})) }))
+  .then(({ ok, data }) => {
+    if (!ok) {
+      alert('❌ ' + (data.error || 'No se pudo crear la orden. Intenta nuevamente.'));
+      restaurarBtn();
+      return;
+    }
+    const avisoFotos = fotos.length && data.fotos_guardadas < fotos.length
+      ? '\n⚠️ No pudimos guardar tus fotos; el técnico podrá pedírtelas después.'
+      : '';
+    alert('✅ Solicitud enviada correctamente. Nos contactaremos contigo a la brevedad.' + avisoFotos);
     window.location.href = 'dashboard.html';
   })
   .catch(err => {
     alert('❌ Error al crear la orden. Intenta nuevamente.');
     console.error(err);
+    restaurarBtn();
   });
+}
+
+// =============================================
+// DESTINO DESPUÉS DE INICIAR SESIÓN
+// Si venía desde "Solicitar servicio", vuelve al formulario
+// =============================================
+function destinoTrasLogin() {
+  const volver = localStorage.getItem('volver_a');
+  localStorage.removeItem('volver_a');
+  return volver === 'ordenes.html' ? 'ordenes.html' : 'dashboard.html';
 }
 
 // =============================================
@@ -166,9 +199,10 @@ function login() {
       sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
       // Redirigir según rol
       if (data.usuario.rol === 'admin') {
+        localStorage.removeItem('volver_a');
         window.location.href = 'admin.html';
       } else {
-        window.location.href = 'dashboard.html';
+        window.location.href = destinoTrasLogin();
       }
     }
   })

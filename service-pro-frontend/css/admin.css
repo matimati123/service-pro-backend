@@ -408,4 +408,123 @@ tr:hover td {
   color: var(--blanco);
   white-space: normal;
   word-break: break-word;
-}
+}
+
+
+/* =============================================
+   DETALLE DE LA ORDEN: fotos + descripción (modal admin)
+   ============================================= */
+
+.modal-box-detalle {
+  width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.detalle-etiqueta {
+  margin: 18px 0 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--gris-texto);
+}
+
+/* Fotos: 3 por fila (izquierda, centro y derecha) */
+.fotos-galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 0 8px;
+}
+
+.fotos-galeria img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  cursor: zoom-in;
+}
+
+.fotos-galeria-msg {
+  grid-column: 1 / -1;
+  color: var(--gris-texto);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Descripción, debajo de las fotos */
+.comentario-texto {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  background: var(--gris-medio);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--blanco);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comentario-texto.vacio {
+  color: var(--gris-texto);
+  font-style: italic;
+}
+
+.foto-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.foto-lightbox img {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+}
+
+
+/* =============================================
+   VENTAS
+   ============================================= */
+.stat-card.rojo { border-color: rgba(239,68,68,0.3); }
+.stat-card.rojo .stat-num { color: #ef4444; }
+
+.ventas-cuerpo {
+  padding: 24px;
+}
+
+.ventas-cuerpo .stats-grid {
+  margin-bottom: 0;
+}
+
+tr.fila-clic {
+  cursor: pointer;
+}
+
+tr.fila-activa td {
+  background: rgba(249,115,22,0.08);
+}
+
+
+/* =============================================
+   FINANZAS
+   ============================================= */
+.finanzas-aviso {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: rgba(234,179,8,0.12);
+  border: 1px solid rgba(234,179,8,0.35);
+  border-radius: 8px;
+  color: #eab308;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}

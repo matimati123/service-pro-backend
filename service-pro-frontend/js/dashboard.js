@@ -135,6 +135,26 @@ function formularioCalificar(orden) {
   return form;
 }
 
+// ---- Botón de WhatsApp con el técnico asignado ----
+function botonWhatsAppTecnico(orden) {
+  const nombreTecnico = orden.tecnico_nombre || 'técnico';
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+  const miNombre = usuario.nombre ? `, soy ${usuario.nombre}` : '';
+  const mensaje = `Hola ${nombreTecnico}${miNombre}. Te escribo por mi orden #${orden.id} de Voltia Pro.`;
+  const numero = String(orden.tecnico_telefono).replace(/\D/g, '');
+
+  const bloque = el('div', 'orden-tecnico');
+  bloque.appendChild(el('p', 'orden-dato', `👷 Técnico asignado: ${nombreTecnico}`));
+
+  const enlace = el('a', 'btn-whatsapp', '💬 Escribir por WhatsApp');
+  enlace.href = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+  enlace.target = '_blank';
+  enlace.rel = 'noopener noreferrer';
+  bloque.appendChild(enlace);
+
+  return bloque;
+}
+
 // ---- Tarjeta de orden ----
 function tarjetaOrden(orden) {
   const card = el('div', 'orden-card');
@@ -147,6 +167,11 @@ function tarjetaOrden(orden) {
   card.appendChild(el('p', 'orden-dato', `📍 ${orden.direccion}`));
   card.appendChild(el('p', 'orden-dato', `🔧 ${nombresServicios(orden.servicios)}`));
   card.appendChild(el('p', 'orden-dato', `📅 ${new Date(orden.created_at).toLocaleDateString('es-CL')}`));
+
+  // Si ya hay técnico asignado con WhatsApp, mostrar el botón para escribirle
+  if (orden.tecnico_telefono && orden.estado !== 'rechazada') {
+    card.appendChild(botonWhatsAppTecnico(orden));
+  }
 
   if (orden.estrellas) {
     card.appendChild(bloqueCalificada(orden.estrellas, orden.comentario));

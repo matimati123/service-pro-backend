@@ -22,6 +22,12 @@
     <a href="#" class="sidebar-link" onclick="mostrarSeccion('seccion-ordenes')">
       📋 Órdenes
     </a>
+    <a href="#" class="sidebar-link" onclick="mostrarSeccion('seccion-ventas')">
+      💰 Ventas
+    </a>
+    <a href="#" class="sidebar-link" onclick="mostrarSeccion('seccion-finanzas')">
+      🏦 Finanzas
+    </a>
     <a href="#" class="sidebar-link" onclick="mostrarSeccion('seccion-usuarios')">
       👥 Usuarios
     </a>
@@ -149,6 +155,173 @@
 
   </div>
 
+  <!-- ===== SECCIÓN VENTAS ===== -->
+  <div id="seccion-ventas" class="admin-seccion" style="display:none;">
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3 id="ventas-titulo-mes">Resumen del mes</h3>
+        <select id="filtro-mes-ventas" onchange="mostrarMesVentas()">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+      <div class="ventas-cuerpo">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <div class="stat-num" id="v-total">0</div>
+              <div class="stat-label">Solicitudes</div>
+            </div>
+          </div>
+          <div class="stat-card verde">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <div class="stat-num" id="v-completadas">0</div>
+              <div class="stat-label">Completadas</div>
+            </div>
+          </div>
+          <div class="stat-card rojo">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+              <div class="stat-num" id="v-rechazadas">0</div>
+              <div class="stat-label">Rechazadas</div>
+            </div>
+          </div>
+          <div class="stat-card naranja">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+              <div class="stat-num" id="v-proceso">0</div>
+              <div class="stat-label">En proceso</div>
+            </div>
+          </div>
+          <div class="stat-card azul">
+            <div class="stat-icon">📈</div>
+            <div class="stat-info">
+              <div class="stat-num" id="v-tasa">—</div>
+              <div class="stat-label">Tasa de cierre</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>Por servicio</h3>
+      </div>
+      <div class="tabla-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>Solicitudes</th>
+              <th>Completadas</th>
+              <th>Rechazadas</th>
+            </tr>
+          </thead>
+          <tbody id="body-ventas-servicios">
+            <tr><td colspan="4" class="tabla-loading">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>Historial por mes</h3>
+      </div>
+      <div class="tabla-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Solicitudes</th>
+              <th>Completadas</th>
+              <th>Rechazadas</th>
+              <th>En proceso</th>
+              <th>Tasa de cierre</th>
+            </tr>
+          </thead>
+          <tbody id="body-ventas-meses">
+            <tr><td colspan="6" class="tabla-loading">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECCIÓN FINANZAS ===== -->
+  <div id="seccion-finanzas" class="admin-seccion" style="display:none;">
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3 id="finanzas-titulo-mes">Finanzas del mes</h3>
+        <select id="filtro-mes-finanzas" onchange="mostrarMesFinanzas()">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+      <div class="ventas-cuerpo">
+        <div class="stats-grid">
+          <div class="stat-card verde">
+            <div class="stat-icon">💵</div>
+            <div class="stat-info">
+              <div class="stat-num" id="f-ingresos">$0</div>
+              <div class="stat-label">Ingresos</div>
+            </div>
+          </div>
+          <div class="stat-card azul">
+            <div class="stat-icon">🧾</div>
+            <div class="stat-info">
+              <div class="stat-num" id="f-ticket">$0</div>
+              <div class="stat-label">Ticket promedio</div>
+            </div>
+          </div>
+          <div class="stat-card naranja">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+              <div class="stat-num" id="f-proceso">$0</div>
+              <div class="stat-label">En proceso</div>
+            </div>
+          </div>
+          <div class="stat-card rojo">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+              <div class="stat-num" id="f-perdido">$0</div>
+              <div class="stat-label">Perdido por rechazos</div>
+            </div>
+          </div>
+        </div>
+        <p id="f-aviso" class="finanzas-aviso" style="display:none;"></p>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h3>Historial por mes</h3>
+      </div>
+      <div class="tabla-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Ingresos</th>
+              <th>Completadas</th>
+              <th>Ticket promedio</th>
+              <th>En proceso</th>
+              <th>Perdido por rechazos</th>
+            </tr>
+          </thead>
+          <tbody id="body-finanzas-meses">
+            <tr><td colspan="6" class="tabla-loading">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
   <!-- ===== SECCIÓN USUARIOS ===== -->
   <div id="seccion-usuarios" class="admin-seccion" style="display:none;">
 
@@ -219,9 +392,52 @@
       <label>Email del técnico</label>
       <input type="email" id="tecnico-email" placeholder="tecnico@ejemplo.com">
     </div>
+    <div class="form-group">
+      <label>WhatsApp del técnico</label>
+      <input type="tel" id="tecnico-telefono" placeholder="Ej: +56 9 1234 5678">
+    </div>
     <div class="modal-btns">
       <button class="btn" onclick="asignarTecnico()">Asignar y Notificar</button>
       <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MONTO DE LA ORDEN -->
+<div id="modal-monto" class="modal" style="display:none;">
+  <div class="modal-box">
+    <h3 id="modal-monto-titulo">Monto de la orden</h3>
+    <p class="subtitulo-form">Valor del trabajo en pesos chilenos. Cuenta como ingreso cuando la orden esté Completada.</p>
+    <input type="hidden" id="monto-orden-id">
+    <div class="form-group">
+      <label>Monto (CLP)</label>
+      <input type="number" id="monto-valor" min="0" step="1000" placeholder="Ej: 45000" inputmode="numeric">
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="guardarMonto()">Guardar monto</button>
+      <button class="btn-secondary" onclick="cerrarModalMonto()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE DE LA ORDEN: fotos + descripción -->
+<div id="modal-detalle" class="modal" style="display:none;">
+  <div class="modal-box modal-box-detalle">
+    <h3 id="modal-detalle-titulo">Detalle de la orden</h3>
+    <p class="subtitulo-form" id="modal-detalle-cliente"></p>
+
+    <div id="detalle-fotos-bloque">
+      <p class="detalle-etiqueta">📷 Fotos del problema</p>
+      <div id="fotos-galeria" class="fotos-galeria"></div>
+    </div>
+
+    <div id="detalle-descripcion-bloque">
+      <p class="detalle-etiqueta">💬 Descripción del problema</p>
+      <div id="detalle-descripcion" class="comentario-texto"></div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
     </div>
   </div>
 </div>

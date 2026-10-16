@@ -127,6 +127,8 @@ function tarjetaOrden(orden) {
   t.appendChild(el('p', 'orden-dato', `📍 ${orden.direccion}`));
   t.appendChild(el('p', 'orden-dato', `🔧 ${nombresServicios(orden.servicios)}`));
   t.appendChild(el('p', 'orden-dato', `📅 ${new Date(orden.created_at).toLocaleDateString('es-CL')}`));
+  const nFotos = Number(orden.total_fotos) || 0;
+  if (nFotos) t.appendChild(el('p', 'orden-dato', `📷 ${nFotos} ${nFotos === 1 ? 'foto adjunta' : 'fotos adjuntas'}`));
 
   if (orden.estrellas) {
     t.appendChild(bloqueCalificada(orden.estrellas, orden.comentario));
