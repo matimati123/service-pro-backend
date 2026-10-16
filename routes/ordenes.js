@@ -226,6 +226,76 @@ router.get('/ventas', verificarToken, async (req, res) => {
   }
 });
 
+// PUT /ordenes/:id/monto — registrar el monto (en pesos) de una orden (solo admin)
+router.put('/:id/monto', verificarToken, async (req, res) => {
+  if (req.user.rol !== 'admin') {
+    return res.status(403).json({ error: 'Solo el administrador puede registrar montos.' });
+  }
+
+  // Vacío = quitar el monto
+  const crudo = req.body.monto;
+  const monto = (crudo === null || crudo === '') ? null : Number(crudo);
+
+  if (monto !== null && (!Number.isInteger(monto) || monto < 0 || monto > 100000000)) {
+    return res.status(400).json({ error: 'Ingresa un monto válido en pesos (número entero, sin puntos).' });
+  }
+
+  try {
+    const [resultado] = await db.promise().query(
+      'UPDATE ordenes SET monto = ? WHERE id = ?',
+      [monto, req.params.id]
+    );
+    if (!resultado.affectedRows) {
+      return res.status(404).json({ error: 'Orden no encontrada.' });
+    }
+    res.json({ ok: true, monto });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar el monto.' });
+  }
+});
+
+// GET /ordenes/finanzas — ingresos por mes (solo admin)
+// (va ANTES de /:id, si no "finanzas" se interpretaría como un id)
+router.get('/finanzas', verificarToken, async (req, res) => {
+  if (req.user.rol !== 'admin') {
+    return res.status(403).json({ error: 'Solo el administrador puede ver las finanzas.' });
+  }
+
+  try {
+    const [filas] = await db.promise().query(
+      `SELECT DATE_FORMAT(created_at, '%Y-%m') AS mes,
+              SUM(CASE WHEN estado = 'completado' THEN COALESCE(monto, 0) ELSE 0 END) AS ingresos,
+              SUM(estado = 'completado') AS completadas,
+              SUM(estado = 'completado' AND monto IS NULL) AS completadas_sin_monto,
+              SUM(CASE WHEN estado NOT IN ('completado', 'rechazada') THEN COALESCE(monto, 0) ELSE 0 END) AS en_proceso,
+              SUM(CASE WHEN estado = 'rechazada' THEN COALESCE(monto, 0) ELSE 0 END) AS perdido,
+              SUM(estado = 'rechazada') AS rechazadas
+       FROM ordenes
+       WHERE created_at IS NOT NULL
+       GROUP BY mes
+       ORDER BY mes DESC
+       LIMIT 24`
+    );
+
+    const num = (v) => Number(v) || 0;
+    res.json({
+      meses: filas.map(f => ({
+        mes: f.mes,
+        ingresos: num(f.ingresos),
+        completadas: num(f.completadas),
+        completadas_sin_monto: num(f.completadas_sin_monto),
+        en_proceso: num(f.en_proceso),
+        perdido: num(f.perdido),
+        rechazadas: num(f.rechazadas)
+      }))
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener las finanzas.' });
+  }
+});
+
 // POST /ordenes/:id/calificacion — calificar una orden completada
 router.post('/:id/calificacion', verificarToken, async (req, res) => {
   const estrellas = Number(req.body.estrellas);
