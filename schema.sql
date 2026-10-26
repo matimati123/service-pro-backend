@@ -91,3 +91,16 @@ CREATE TABLE IF NOT EXISTS `calificaciones` (
   UNIQUE KEY `uq_calificacion_orden` (`orden_id`),
   KEY `idx_calificacion_usuario` (`usuario_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 8. Tabla: tecnicos (técnicos con sus especialidades)
+CREATE TABLE IF NOT EXISTS `tecnicos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `telefono` varchar(20) NOT NULL DEFAULT '',
+  `especialidades` varchar(100) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_tecnico_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -527,16 +527,26 @@ router.put('/:id/estado', async (req, res) => {
 });
 
 // PUT /ordenes/:id/asignar — asignar técnico (con su WhatsApp) y notificar por mail
-router.put('/:id/asignar', async (req, res) => {
-  const { tecnico_nombre, tecnico_email, tecnico_telefono } = req.body;
-
-  if (!tecnico_nombre || !tecnico_email) {
-    return res.status(400).json({ error: 'Nombre y email del técnico son obligatorios.' });
+router.put('/:id/asignar', verificarToken, async (req, res) => {
+  if (req.user.rol !== 'admin') {
+    return res.status(403).json({ error: 'Solo el administrador puede asignar técnicos.' });
   }
 
-  const telefonoTecnico = normalizarTelefonoCL(tecnico_telefono);
-  if (!telefonoTecnico) {
-    return res.status(400).json({ error: 'El WhatsApp del técnico es obligatorio (ej: +56 9 1234 5678).' });
+  // Dos formas de asignar: con tecnico_id (técnico registrado, se valida su especialidad)
+  // o, como antes, escribiendo nombre/email/WhatsApp a mano.
+  const { tecnico_id } = req.body;
+  let { tecnico_nombre, tecnico_email, tecnico_telefono } = req.body;
+  let telefonoTecnico = null;
+
+  if (!tecnico_id) {
+    if (!tecnico_nombre || !tecnico_email) {
+      return res.status(400).json({ error: 'Nombre y email del técnico son obligatorios.' });
+    }
+
+    telefonoTecnico = normalizarTelefonoCL(tecnico_telefono);
+    if (!telefonoTecnico) {
+      return res.status(400).json({ error: 'El WhatsApp del técnico es obligatorio (ej: +56 9 1234 5678).' });
+    }
   }
 
   try {
@@ -552,6 +562,34 @@ router.put('/:id/asignar', async (req, res) => {
 
     if (!ordenes.length) return res.status(404).json({ error: 'Orden no encontrada.' });
     const orden = ordenes[0];
+
+    // Técnico registrado: debe estar activo y hacer TODOS los servicios de la orden
+    if (tecnico_id) {
+      const [tecnicos] = await db.promise().query('SELECT * FROM tecnicos WHERE id = ?', [tecnico_id]);
+      if (!tecnicos.length || !tecnicos[0].activo) {
+        return res.status(400).json({ error: 'El técnico no existe o está desactivado.' });
+      }
+      const t = tecnicos[0];
+
+      const [pedidos] = await db.promise().query(
+        'SELECT servicio FROM servicios_orden WHERE orden_id = ?', [orden.id]
+      );
+      const sabe = String(t.especialidades || '').split(',');
+      const etiquetas = { camara: 'cámaras', enchufe: 'enchufes', alumbrado: 'alumbrado' };
+      const faltan = [...new Set(pedidos.map(p => p.servicio).filter(s => s && !sabe.includes(s)))];
+      if (faltan.length) {
+        return res.status(400).json({
+          error: `${t.nombre} no realiza: ${faltan.map(f => etiquetas[f] || f).join(', ')}. Elige otro técnico.`
+        });
+      }
+
+      telefonoTecnico = normalizarTelefonoCL(t.telefono);
+      if (!telefonoTecnico) {
+        return res.status(400).json({ error: `${t.nombre} no tiene un WhatsApp válido. Corrígelo en la sección Técnicos.` });
+      }
+      tecnico_nombre = t.nombre;
+      tecnico_email = t.email;
+    }
 
     // Actualizar técnico en la orden
     await db.promise().query(
