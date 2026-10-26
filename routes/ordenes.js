@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { verificarToken, tokenOpcional, soloAdmin } = require('../middleware/auth');
+const { validarVisita, buscarChoque, fechaCorta } = require('../services/agenda');
 
 // =============================================
 // ENVIAR CORREO CON RESEND
@@ -395,10 +396,18 @@ router.get('/:id', verificarToken, async (req, res) => {
 
 // POST /ordenes — crear orden
 router.post('/', tokenOpcional, async (req, res) => {
-  const { cliente, direccion, servicios, observaciones, fotos } = req.body;
+  const { cliente, direccion, servicios, observaciones, fotos, fecha_visita, hora_visita } = req.body;
 
   if (!cliente || !direccion || !servicios || servicios.length === 0) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' });
+  }
+
+  // Visita pedida por el cliente (opcional para no romper formularios antiguos, pero si viene debe ser válida)
+  let visita = { fecha: null, hora: null };
+  if (fecha_visita || hora_visita) {
+    const errorVisita = validarVisita(fecha_visita, hora_visita);
+    if (errorVisita) return res.status(400).json({ error: errorVisita });
+    visita = { fecha: fecha_visita, hora: hora_visita };
   }
 
   // Validar las fotos ANTES de crear nada: si alguna es inválida no queda una orden a medias
@@ -410,10 +419,21 @@ router.post('/', tokenOpcional, async (req, res) => {
   }
 
   try {
-    const [result] = await db.promise().query(
-      'INSERT INTO ordenes (cliente, direccion, estado, observaciones, usuario_id) VALUES (?, ?, ?, ?, ?)',
-      [cliente, direccion, 'pendiente', observaciones || null, req.user ? req.user.id : null]
-    );
+    let result;
+    try {
+      [result] = await db.promise().query(
+        'INSERT INTO ordenes (cliente, direccion, estado, observaciones, usuario_id, fecha_visita, hora_visita) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [cliente, direccion, 'pendiente', observaciones || null, req.user ? req.user.id : null, visita.fecha, visita.hora]
+      );
+    } catch (insErr) {
+      // Si la tabla aún no tiene las columnas de visita, la orden se crea igual (sin fecha)
+      if (insErr.code !== 'ER_BAD_FIELD_ERROR') throw insErr;
+      console.error('La tabla ordenes no tiene fecha_visita/hora_visita; se guarda sin visita.');
+      [result] = await db.promise().query(
+        'INSERT INTO ordenes (cliente, direccion, estado, observaciones, usuario_id) VALUES (?, ?, ?, ?, ?)',
+        [cliente, direccion, 'pendiente', observaciones || null, req.user ? req.user.id : null]
+      );
+    }
 
     const ordenId = result.insertId;
 
@@ -600,6 +620,23 @@ router.put('/:id/asignar', verificarToken, async (req, res) => {
       }
       tecnico_nombre = t.nombre;
       tecnico_email = t.email;
+    }
+
+    // El técnico no puede tener otra orden activa a la misma fecha y hora
+    try {
+      const [v] = await db.promise().query(
+        "SELECT DATE_FORMAT(fecha_visita, '%Y-%m-%d') AS f, hora_visita AS h FROM ordenes WHERE id = ?", [orden.id]
+      );
+      if (v[0] && v[0].f && v[0].h) {
+        const choque = await buscarChoque(db, tecnico_email, v[0].f, v[0].h, orden.id);
+        if (choque) {
+          return res.status(409).json({
+            error: `${tecnico_nombre} ya tiene la orden #${choque.id} (${choque.cliente}) el ${fechaCorta(v[0].f)} a las ${v[0].h}. Elige otro técnico o cambia la hora de la visita en la Agenda.`
+          });
+        }
+      }
+    } catch (choqueErr) {
+      if (choqueErr.code !== 'ER_BAD_FIELD_ERROR') throw choqueErr;   // sin columnas de visita: no hay nada que validar
     }
 
     // Actualizar técnico en la orden
