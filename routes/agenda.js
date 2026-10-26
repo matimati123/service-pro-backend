@@ -14,6 +14,38 @@ router.use(verificarToken, soloAdmin);
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_DIAS = 62;
 
+// GET /agenda/sin-fecha — órdenes activas que no tienen fecha u hora de visita
+// (por ejemplo las creadas antes de que se guardara la visita). No salen en el calendario.
+router.get('/sin-fecha', async (req, res) => {
+  try {
+    const [filas] = await db.promise().query(
+      `SELECT o.id, o.cliente, o.direccion, o.estado, o.tecnico_nombre, o.tecnico_email,
+              GROUP_CONCAT(DISTINCT s.servicio SEPARATOR ',') AS servicios
+       FROM ordenes o
+       LEFT JOIN servicios_orden s ON s.orden_id = o.id
+       WHERE (o.fecha_visita IS NULL OR o.hora_visita IS NULL OR o.hora_visita = '')
+         AND o.estado NOT IN ('rechazada', 'completado')
+       GROUP BY o.id
+       ORDER BY o.created_at DESC
+       LIMIT 100`
+    );
+    res.json({
+      ordenes: filas.map(f => ({
+        id: f.id,
+        cliente: f.cliente,
+        direccion: f.direccion,
+        estado: f.estado,
+        tecnico_nombre: f.tecnico_nombre,
+        tecnico_email: f.tecnico_email ? String(f.tecnico_email).toLowerCase() : null,
+        servicios: f.servicios ? f.servicios.split(',') : []
+      }))
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar las órdenes sin fecha.' });
+  }
+});
+
 // GET /agenda?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — visitas del rango (sin las rechazadas)
 router.get('/', async (req, res) => {
   const { desde, hasta } = req.query;
