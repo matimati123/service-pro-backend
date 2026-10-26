@@ -8,6 +8,7 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { verificarToken, soloAdmin } = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'servicepro_secret_2024';
 
@@ -59,7 +60,7 @@ async function enviarCorreo({ to, subject, html }) {
 }
 
 // GET /users — listar usuarios (solo admin)
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, soloAdmin, async (req, res) => {
   try {
     const [usuarios] = await db.promise().query(
       'SELECT id, nombre, email, rol, created_at FROM usuarios ORDER BY created_at DESC'

@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { verificarToken, tokenOpcional } = require('../middleware/auth');
+const { verificarToken, tokenOpcional, soloAdmin } = require('../middleware/auth');
 
 // =============================================
 // ENVIAR CORREO CON RESEND
@@ -97,7 +97,7 @@ function adjuntosDesdeFilas(filas) {
 // GET /ordenes — obtener todas
 // (cada orden trae `comentarios_usuario`, con todos los
 // comentarios que ha dejado el cliente de esa orden)
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, soloAdmin, async (req, res) => {
   try {
     const [ordenes] = await db.promise().query(
       `SELECT o.*, 
@@ -370,13 +370,24 @@ router.get('/:id/fotos', verificarToken, async (req, res) => {
 });
 
 // GET /ordenes/:id
-router.get('/:id', async (req, res) => {
+// Pueden verla: el admin, el dueño de la orden y el técnico asignado.
+router.get('/:id', verificarToken, async (req, res) => {
   try {
     const [ordenes] = await db.promise().query(
       'SELECT * FROM ordenes WHERE id = ?', [req.params.id]
     );
     if (!ordenes.length) return res.status(404).json({ error: 'Orden no encontrada.' });
-    res.json(ordenes[0]);
+    const orden = ordenes[0];
+
+    const esAdmin = req.user.rol === 'admin';
+    const esDueno = orden.usuario_id !== null && orden.usuario_id === req.user.id;
+    const esTecnico = req.user.rol === 'tecnico' && !!orden.tecnico_email &&
+      orden.tecnico_email.toLowerCase() === String(req.user.email || '').toLowerCase();
+    if (!esAdmin && !esDueno && !esTecnico) {
+      return res.status(403).json({ error: 'No tienes permiso para ver esta orden.' });
+    }
+
+    res.json(orden);
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener orden.' });
   }
@@ -507,7 +518,7 @@ router.post('/', tokenOpcional, async (req, res) => {
 });
 
 // PUT /ordenes/:id/estado — cambiar estado (admin)
-router.put('/:id/estado', async (req, res) => {
+router.put('/:id/estado', verificarToken, soloAdmin, async (req, res) => {
   const { estado } = req.body;
   const estadosValidos = ['pendiente', 'evaluada', 'cotizada', 'aprobada', 'completado', 'rechazada'];
 
@@ -671,7 +682,7 @@ router.put('/:id/asignar', verificarToken, async (req, res) => {
 });
 
 // DELETE /ordenes/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verificarToken, soloAdmin, async (req, res) => {
   try {
     await db.promise().query('DELETE FROM servicios_orden WHERE orden_id = ?', [req.params.id]);
     await db.promise().query('DELETE FROM ordenes WHERE id = ?', [req.params.id]);

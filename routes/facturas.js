@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../db'); // 🔥 IMPORTANTE: conexión a MySQL
+const { verificarToken, soloAdmin } = require('../middleware/auth');
 
 // Servicios y precios
 const servicios = {
@@ -42,14 +43,14 @@ function crearFacturaDesdeOrden(orden) {
 // ===============================
 // 📄 GET todas las facturas (MEMORIA)
 // ===============================
-router.get('/', function(req, res) {
+router.get('/', verificarToken, soloAdmin, function(req, res) {
   res.json(facturas);
 });
 
 // ===============================
 // 🔎 GET factura por ID (MYSQL)
 // ===============================
-router.get('/:id', (req, res) => {
+router.get('/:id', verificarToken, soloAdmin, (req, res) => {
   const id = parseInt(req.params.id);
 
   const query = `

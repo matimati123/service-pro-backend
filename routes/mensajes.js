@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { verificarToken, soloAdmin } = require('../middleware/auth');
 
 // =============================================
 // ENVIAR CORREO CON RESEND
@@ -39,7 +40,7 @@ async function enviarCorreo({ to, subject, html }) {
 // =============================================
 // GET /mensajes — obtener todos (admin)
 // =============================================
-router.get('/', async (req, res) => {
+router.get('/', verificarToken, soloAdmin, async (req, res) => {
   try {
     const [mensajes] = await db.promise().query(
       'SELECT * FROM mensajes_chatbot ORDER BY created_at DESC'

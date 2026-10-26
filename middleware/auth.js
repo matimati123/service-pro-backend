@@ -31,4 +31,12 @@ function tokenOpcional(req, res, next) {
   next();
 }
 
-module.exports = { verificarToken, tokenOpcional };
+// Debe ir DESPUÉS de verificarToken: deja pasar solo al administrador
+function soloAdmin(req, res, next) {
+  if (!req.user || req.user.rol !== 'admin') {
+    return res.status(403).json({ error: 'Solo el administrador puede hacer esto.' });
+  }
+  next();
+}
+
+module.exports = { verificarToken, tokenOpcional, soloAdmin };
