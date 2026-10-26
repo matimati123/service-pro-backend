@@ -20,6 +20,7 @@ var facturasModule = require('./routes/facturas');
 var facturasRouter = facturasModule.router;
 var ordenesRouter = require('./routes/ordenes');
 var mensajesRouter = require('./routes/mensajes');
+var reportesRouter = require('./routes/reportes');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -193,6 +194,7 @@ app.use('/users', usersRouter);
 app.use('/facturas', facturasRouter);
 app.use('/ordenes', ordenesRouter);
 app.use('/mensajes', mensajesRouter);
+app.use('/reportes', reportesRouter);
 app.use('/health', healthRouter);
 
 // =============================================
