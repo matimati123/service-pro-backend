@@ -69,7 +69,9 @@ function calcularProgreso(etapas) {
     total: cuentan.length,
     hechas,
     porcentaje: cuentan.length ? Math.round((hechas / cuentan.length) * 100) : 0,
-    etapa_actual: actual ? actual.nombre : (cuentan.length ? 'Todo completado' : '—')
+    etapa_actual: actual ? actual.nombre : (cuentan.length ? 'Todo completado' : '—'),
+    // clave de la etapa en que está el proyecto ('completo' si ya terminó todo)
+    etapa_clave: actual ? actual.clave : (cuentan.length ? 'completo' : null)
   };
 }
 
