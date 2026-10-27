@@ -23,6 +23,7 @@ var mensajesRouter = require('./routes/mensajes');
 var reportesRouter = require('./routes/reportes');
 var tecnicosRouter = require('./routes/tecnicos');
 var agendaRouter = require('./routes/agenda');
+var etapasRouter = require('./routes/etapas');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -199,6 +200,7 @@ app.use('/mensajes', mensajesRouter);
 app.use('/reportes', reportesRouter);
 app.use('/tecnicos', tecnicosRouter);
 app.use('/agenda', agendaRouter);
+app.use('/etapas', etapasRouter);
 app.use('/health', healthRouter);
 
 // =============================================
