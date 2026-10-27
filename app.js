@@ -29,6 +29,10 @@ var healthRouter = require('./routes/health');
 var db = require('./db');
 var app = express();
 
+// Render pone un proxy delante: sin esto TODOS los visitantes comparten la misma IP
+// y el límite de peticiones se gasta entre todos (error "Demasiadas peticiones").
+app.set('trust proxy', 1);
+
 // =============================================
 // HELMET
 // =============================================
@@ -83,7 +87,7 @@ app.use(cors({
 // =============================================
 var limiterGeneral = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 600, // el panel admin hace varias peticiones por pantalla
   message: { error: 'Demasiadas peticiones, intenta más tarde.' }
 });
 
