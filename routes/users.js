@@ -59,6 +59,43 @@ async function enviarCorreo({ to, subject, html }) {
   return res.json();
 }
 
+// Genera un código de 6 dígitos, lo guarda 5 minutos y lo manda al correo del usuario.
+// Lo usan el login con contraseña y el login con Google (solo administradores).
+// Lanza error si el correo no se pudo enviar (en ese caso no queda ningún código pendiente).
+async function iniciar2FA(usuario) {
+  const codigo = generarCodigo();
+  codigosPendientes.set(usuario.email, {
+    codigo,
+    expira: Date.now() + 5 * 60 * 1000, // 5 minutos
+    intentos: 0,
+    usuario
+  });
+
+  try {
+    await enviarCorreo({
+      to: usuario.email,
+      subject: '🔐 Código de verificación — Voltia Pro SPA',
+      html: `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"></head>
+          <body>
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
+            <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
+            <h3>Tu código de verificación</h3>
+            <p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #333; text-align: center; margin: 24px 0;">${codigo}</p>
+            <p style="color: #555;">Este código vence en 5 minutos. Si no intentaste iniciar sesión, ignora este correo.</p>
+          </div>
+          </body>
+          </html>
+        `
+    });
+  } catch (err) {
+    codigosPendientes.delete(usuario.email);
+    throw err;
+  }
+}
+
 // GET /users — listar usuarios (solo admin)
 router.get('/', verificarToken, soloAdmin, async (req, res) => {
   try {
@@ -154,32 +191,8 @@ router.post('/login', async (req, res) => {
     }
 
     // ===== Admin: generar código y mandarlo por correo =====
-    const codigo = generarCodigo();
-    codigosPendientes.set(usuario.email, {
-      codigo,
-      expira: Date.now() + 5 * 60 * 1000, // 5 minutos
-      usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol }
-    });
-
     try {
-      await enviarCorreo({
-        to: usuario.email,
-        subject: '🔐 Código de verificación — Voltia Pro SPA',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head><meta charset="utf-8"></head>
-          <body>
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
-            <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
-            <h3>Tu código de verificación</h3>
-            <p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #333; text-align: center; margin: 24px 0;">${codigo}</p>
-            <p style="color: #555;">Este código vence en 5 minutos. Si no intentaste iniciar sesión, ignora este correo.</p>
-          </div>
-          </body>
-          </html>
-        `
-      });
+      await iniciar2FA({ id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol });
     } catch (mailErr) {
       console.error('Error enviando código 2FA:', mailErr);
       return res.status(500).json({ error: 'No se pudo enviar el código de verificación. Intenta nuevamente.' });
@@ -214,7 +227,12 @@ router.post('/verificar-2fa', async (req, res) => {
     return res.status(400).json({ error: 'El código venció. Inicia sesión de nuevo para recibir uno nuevo.' });
   }
 
-  if (codigo.trim() !== pendiente.codigo) {
+  if (String(codigo).trim() !== pendiente.codigo) {
+    pendiente.intentos = (pendiente.intentos || 0) + 1;
+    if (pendiente.intentos >= 5) {
+      codigosPendientes.delete(email.trim().toLowerCase());
+      return res.status(401).json({ error: 'Demasiados intentos fallidos. Inicia sesión de nuevo para recibir un código nuevo.' });
+    }
     return res.status(401).json({ error: 'Código incorrecto.' });
   }
 
@@ -253,4 +271,5 @@ router.post('/recuperar', async (req, res) => {
   }
 });
 
+router.iniciar2FA = iniciar2FA; // lo usa el login con Google (app.js)
 module.exports = router;

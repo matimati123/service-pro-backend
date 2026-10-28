@@ -8,8 +8,16 @@ const router = express.Router();
 const db = require('../db');
 const { verificarToken, soloAdmin } = require('../middleware/auth');
 const { validarVisita, buscarChoque, fechaCorta } = require('../services/agenda');
+const { enviarCorreo, htmlVisitaReprogramada } = require('../services/correo');
 
 router.use(verificarToken, soloAdmin);
+
+// Fecha DATE de MySQL (Date o texto) -> AAAA-MM-DD
+function aTexto(v) {
+  if (typeof v === 'string') return v.slice(0, 10);
+  const p = n => String(n).padStart(2, '0');
+  return `${v.getFullYear()}-${p(v.getMonth() + 1)}-${p(v.getDate())}`;
+}
 
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_DIAS = 62;
@@ -96,7 +104,9 @@ router.put('/:id', async (req, res) => {
 
   try {
     const [ordenes] = await db.promise().query(
-      'SELECT id, estado, tecnico_nombre, tecnico_email FROM ordenes WHERE id = ?', [req.params.id]
+      `SELECT o.id, o.estado, o.cliente, o.direccion, o.tecnico_nombre, o.tecnico_email,
+              o.fecha_visita, o.hora_visita, u.email AS cliente_email, u.nombre AS cliente_nombre
+       FROM ordenes o LEFT JOIN usuarios u ON u.id = o.usuario_id WHERE o.id = ?`, [req.params.id]
     );
     if (!ordenes.length) return res.status(404).json({ error: 'Orden no encontrada.' });
     const orden = ordenes[0];
@@ -113,7 +123,36 @@ router.put('/:id', async (req, res) => {
       'UPDATE ordenes SET fecha_visita = ?, hora_visita = ? WHERE id = ?',
       [fecha_visita, hora_visita, orden.id]
     );
-    res.json({ ok: true, mensaje: 'Visita reprogramada.' });
+
+    // Avisar por correo al cliente y al técnico (si el horario realmente cambió).
+    // Si el correo falla, la visita igual queda reprogramada: solo se informa en "avisos".
+    const antes = orden.fecha_visita && orden.hora_visita
+      ? { fecha: aTexto(orden.fecha_visita), hora: orden.hora_visita } : null;
+    const ahora = { fecha: fecha_visita, hora: hora_visita };
+    const avisos = { cliente: 'sin_correo', tecnico: 'sin_tecnico' };
+    if (!antes || antes.fecha !== ahora.fecha || antes.hora !== ahora.hora) {
+      const envios = [
+        ['cliente', orden.cliente_email, orden.cliente_nombre || orden.cliente],
+        ['tecnico', orden.tecnico_email, orden.tecnico_nombre]
+      ];
+      await Promise.all(envios.map(async ([para, correo, nombre]) => {
+        if (!correo) return;
+        try {
+          await enviarCorreo({
+            to: correo,
+            subject: `📅 ${antes ? 'Visita reprogramada' : 'Visita agendada'} — orden #${orden.id}`,
+            html: htmlVisitaReprogramada({ para, nombre, orden, antes, ahora })
+          });
+          avisos[para] = 'enviado';
+        } catch (mailErr) {
+          console.error(`No se pudo avisar al ${para} de la orden #${orden.id}:`, mailErr.message);
+          avisos[para] = 'error';
+        }
+      }));
+    } else {
+      avisos.cliente = avisos.tecnico = 'sin_cambio';
+    }
+    res.json({ ok: true, mensaje: 'Visita reprogramada.', avisos });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al reprogramar la visita.' });

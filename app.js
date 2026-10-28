@@ -24,6 +24,7 @@ var reportesRouter = require('./routes/reportes');
 var tecnicosRouter = require('./routes/tecnicos');
 var agendaRouter = require('./routes/agenda');
 var etapasRouter = require('./routes/etapas');
+var materialesRouter = require('./routes/materiales');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -177,7 +178,18 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: process.env.FRONTEND_URL + '/login.html' }),
-  (req, res) => {
+  async (req, res) => {
+    // Administradores: también piden el código por correo (igual que con contraseña)
+    if (req.user.rol === 'admin') {
+      try {
+        await usersRouter.iniciar2FA({ id: req.user.id, nombre: req.user.nombre, email: req.user.email, rol: req.user.rol });
+        return res.redirect(`${process.env.FRONTEND_URL}/login.html?verificar=${encodeURIComponent(req.user.email)}`);
+      } catch (err) {
+        console.error('Error enviando código 2FA (Google):', err);
+        return res.redirect(`${process.env.FRONTEND_URL}/login.html?error=2fa`);
+      }
+    }
+
     const token = jwt.sign(
       { id: req.user.id, email: req.user.email, rol: req.user.rol, nombre: req.user.nombre },
       process.env.JWT_SECRET,
@@ -205,6 +217,7 @@ app.use('/reportes', reportesRouter);
 app.use('/tecnicos', tecnicosRouter);
 app.use('/agenda', agendaRouter);
 app.use('/etapas', etapasRouter);
+app.use('/materiales', materialesRouter);
 app.use('/health', healthRouter);
 
 // =============================================
