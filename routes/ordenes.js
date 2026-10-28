@@ -13,29 +13,7 @@ const { validarVisita, buscarChoque, fechaCorta } = require('../services/agenda'
 // Usamos fetch a la API de Resend en vez de Nodemailer/SMTP,
 // porque Render (plan gratis) bloquea las conexiones SMTP salientes.
 // =============================================
-async function enviarCorreo({ to, subject, html, attachments }) {
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: 'Voltia Pro SPA <onboarding@resend.dev>',
-      to,
-      subject,
-      html,
-      ...(attachments && attachments.length ? { attachments } : {})
-    })
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.text();
-    throw new Error(`Resend error (${res.status}): ${errorBody}`);
-  }
-
-  return res.json();
-}
+const { enviarCorreo } = require('../services/correo');
 
 // Normaliza un celular chileno a formato internacional sin "+" (ej: 56912345678).
 // Acepta "+56 9 1234 5678", "56912345678", "9 1234 5678" o "912345678".

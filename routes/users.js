@@ -36,28 +36,7 @@ setInterval(() => {
 // =============================================
 // ENVIAR CORREO CON RESEND
 // =============================================
-async function enviarCorreo({ to, subject, html }) {
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: 'Voltia Pro SPA <onboarding@resend.dev>',
-      to,
-      subject,
-      html
-    })
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.text();
-    throw new Error(`Resend error (${res.status}): ${errorBody}`);
-  }
-
-  return res.json();
-}
+const { enviarCorreo } = require('../services/correo');
 
 // Genera un código de 6 dígitos, lo guarda 5 minutos y lo manda al correo del usuario.
 // Lo usan el login con contraseña y el login con Google (solo administradores).
