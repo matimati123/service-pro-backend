@@ -180,7 +180,8 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: process.env.FRONTEND_URL + '/login.html' }),
   async (req, res) => {
     // Administradores: también piden el código por correo (igual que con contraseña)
-    if (req.user.rol === 'admin') {
+    // (Interruptor de emergencia: en Render, variable GOOGLE_2FA=off desactiva este paso)
+    if (req.user.rol === 'admin' && process.env.GOOGLE_2FA !== 'off') {
       try {
         await usersRouter.iniciar2FA({ id: req.user.id, nombre: req.user.nombre, email: req.user.email, rol: req.user.rol });
         return res.redirect(`${process.env.FRONTEND_URL}/login.html?verificar=${encodeURIComponent(req.user.email)}`);
