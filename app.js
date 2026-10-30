@@ -25,6 +25,7 @@ var tecnicosRouter = require('./routes/tecnicos');
 var agendaRouter = require('./routes/agenda');
 var etapasRouter = require('./routes/etapas');
 var materialesRouter = require('./routes/materiales');
+var respaldoRouter = require('./routes/respaldo');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -219,6 +220,7 @@ app.use('/tecnicos', tecnicosRouter);
 app.use('/agenda', agendaRouter);
 app.use('/etapas', etapasRouter);
 app.use('/materiales', materialesRouter);
+app.use('/respaldo', respaldoRouter);
 app.use('/health', healthRouter);
 
 // =============================================
