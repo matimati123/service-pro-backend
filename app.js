@@ -27,6 +27,8 @@ var etapasRouter = require('./routes/etapas');
 var materialesRouter = require('./routes/materiales');
 var respaldoRouter = require('./routes/respaldo');
 var tareasRouter = require('./routes/tareas');
+var auditoriaRouter = require('./routes/auditoria');
+var auditoria = require('./services/auditoria');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -113,6 +115,7 @@ app.post('/ordenes', express.json({ limit: '8mb' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(auditoria.middleware);   // anota quién cambió qué (ver services/auditoria.js)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // =============================================
@@ -223,6 +226,7 @@ app.use('/etapas', etapasRouter);
 app.use('/materiales', materialesRouter);
 app.use('/respaldo', respaldoRouter);
 app.use('/tareas', tareasRouter);
+app.use('/auditoria', auditoriaRouter);
 app.use('/health', healthRouter);
 
 // =============================================

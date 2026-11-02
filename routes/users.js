@@ -37,6 +37,7 @@ setInterval(() => {
 // ENVIAR CORREO CON RESEND
 // =============================================
 const { enviarCorreo } = require('../services/correo');
+const auditoria = require('../services/auditoria');
 
 // Genera un código de 6 dígitos, lo guarda 5 minutos y lo manda al correo del usuario.
 // Lo usan el login con contraseña y el login con Google (solo administradores).
@@ -212,6 +213,7 @@ router.post('/verificar-2fa', async (req, res) => {
       codigosPendientes.delete(email.trim().toLowerCase());
       return res.status(401).json({ error: 'Demasiados intentos fallidos. Inicia sesión de nuevo para recibir un código nuevo.' });
     }
+    auditoria.registrar({ usuario: pendiente.usuario, accion: 'Código de verificación incorrecto', entidad: 'sesion', ip: req.ip });
     return res.status(401).json({ error: 'Código incorrecto.' });
   }
 
@@ -224,6 +226,7 @@ router.post('/verificar-2fa', async (req, res) => {
     { expiresIn: '8h' }
   );
 
+  auditoria.registrar({ usuario: pendiente.usuario, accion: 'Inició sesión como administrador', entidad: 'sesion', ip: req.ip });
   res.json({ ok: true, token, usuario: pendiente.usuario });
 });
 
