@@ -114,4 +114,28 @@ function htmlVisitaReprogramada({ para, nombre, orden, antes, ahora }) {
   </div></body></html>`;
 }
 
-module.exports = { enviarCorreo, htmlVisitaReprogramada, gmailConfigurado, armarMensajeRaw };
+
+// Recordatorio un día antes de la visita. para = "cliente" | "tecnico".
+function htmlRecordatorioVisita({ para, nombre, orden, fecha, hora }) {
+  const intro = para === 'tecnico'
+    ? `Mañana tienes una visita técnica asignada (orden #${esc(orden.id)}).`
+    : `Te recordamos que mañana te visitará nuestro técnico (orden #${esc(orden.id)}).`;
+  const quien = para === 'tecnico'
+    ? `<br>👤 Cliente: ${esc(orden.cliente || '—')}`
+    : (orden.tecnico_nombre ? `<br>🔧 Técnico: ${esc(orden.tecnico_nombre)}` : '');
+  const cierre = para === 'tecnico'
+    ? 'Revisa la orden en el panel antes de salir.'
+    : 'Si necesitas cambiar el horario, responde a este correo o contáctanos con anticipación.';
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
+  <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #f9f9f9; padding: 24px; border-radius: 10px;">
+    <h2 style="color: #f97316;">⚡ Voltia Pro SPA</h2>
+    <h3>Recordatorio de visita técnica</h3>
+    <p>Hola ${esc(nombre || '')},</p>
+    <p>${intro}</p>
+    <p style="font-size: 20px; font-weight: bold; color: #333; margin: 18px 0;">📅 ${esc(fechaLarga(fecha))} a las ${esc(hora)}</p>
+    <p style="color:#555;">📍 ${esc(orden.direccion || '—')}${quien}</p>
+    <p style="color:#777; font-size: 13px;">${cierre}</p>
+  </div></body></html>`;
+}
+
+module.exports = { enviarCorreo, htmlVisitaReprogramada, htmlRecordatorioVisita, gmailConfigurado, armarMensajeRaw };

@@ -26,6 +26,7 @@ var agendaRouter = require('./routes/agenda');
 var etapasRouter = require('./routes/etapas');
 var materialesRouter = require('./routes/materiales');
 var respaldoRouter = require('./routes/respaldo');
+var tareasRouter = require('./routes/tareas');
 var healthRouter = require('./routes/health');
 
 var db = require('./db');
@@ -221,6 +222,7 @@ app.use('/agenda', agendaRouter);
 app.use('/etapas', etapasRouter);
 app.use('/materiales', materialesRouter);
 app.use('/respaldo', respaldoRouter);
+app.use('/tareas', tareasRouter);
 app.use('/health', healthRouter);
 
 // =============================================

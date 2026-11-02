@@ -9,6 +9,7 @@ const db = require('../db');
 const { verificarToken, soloAdmin } = require('../middleware/auth');
 const { validarVisita, buscarChoque, fechaCorta } = require('../services/agenda');
 const { enviarCorreo, htmlVisitaReprogramada } = require('../services/correo');
+const { asegurarColumna } = require('../services/recordatorios');
 
 router.use(verificarToken, soloAdmin);
 
@@ -119,8 +120,10 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Al mover la visita se limpia la marca de "recordatorio enviado" para que vuelva a avisarse
+    const conMarca = await asegurarColumna();
     await db.promise().query(
-      'UPDATE ordenes SET fecha_visita = ?, hora_visita = ? WHERE id = ?',
+      `UPDATE ordenes SET fecha_visita = ?, hora_visita = ?${conMarca ? ', recordatorio_enviado = NULL' : ''} WHERE id = ?`,
       [fecha_visita, hora_visita, orden.id]
     );
 
