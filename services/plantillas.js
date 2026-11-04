@@ -40,7 +40,7 @@ function htmlReporteSemanal({ recibidas, calificaciones, estancadas, visitas, ur
     <p style="color:#555;">Últimos 7 días:</p>
     <ul style="color:#333; line-height:1.8;">
       <li>Órdenes nuevas: <b>${esc(recibidas.total)}</b></li>
-      <li>De ellas, hoy: completadas <b>${esc(recibidas.completadas)}</b> · en proceso <b>${esc(recibidas.en_proceso)}</b> · rechazadas <b>${esc(recibidas.rechazadas)}</b></li>
+      <li>De ellas, estado actual: completadas <b>${esc(recibidas.completadas)}</b> · en proceso <b>${esc(recibidas.en_proceso)}</b> · rechazadas <b>${esc(recibidas.rechazadas)}</b></li>
       <li>Ingresos de esas órdenes completadas: <b>${pesos(recibidas.ingresos)}</b></li>
       <li>Satisfacción: <b>${prom}</b></li>
       <li>Órdenes pendientes sin atender: <b>${esc(estancadas)}</b></li>
