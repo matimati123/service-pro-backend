@@ -23,6 +23,9 @@ async function generarSQL() {
   const partes = [
     `-- Respaldo de ${base}`,
     `-- Generado: ${new Date().toISOString()}`,
+    // El servidor entrega las estructuras con comillas dobles (modo ANSI_QUOTES). Sin esta línea,
+    // restaurar el archivo en un MySQL normal falla con error de sintaxis.
+    "SET SESSION sql_mode='ANSI_QUOTES';",
     'SET FOREIGN_KEY_CHECKS=0;',
     'SET NAMES utf8mb4;',
     ''

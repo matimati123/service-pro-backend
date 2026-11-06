@@ -28,6 +28,8 @@ test('respaldo.generarSQL: incluye estructura, filas y escapa valores', async ()
   assert.match(r.sql, /O\\'Brien/);
   assert.match(r.sql, /NULL/);
   assert.match(r.sql, /FOREIGN_KEY_CHECKS=0/);
+  // Las estructuras vienen con comillas dobles: el archivo debe activar ANSI_QUOTES para poder restaurarse
+  assert.match(r.sql, /SET SESSION sql_mode='ANSI_QUOTES';/);
 });
 
 test('respaldo.ejecutarRespaldo: manda un .sql.gz por correo', async () => {
