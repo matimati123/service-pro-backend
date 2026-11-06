@@ -10,7 +10,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { verificarToken, soloAdmin } = require('../middleware/auth');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'servicepro_secret_2024';
+const JWT_SECRET = require('../middleware/jwtSecret');
 
 // =============================================
 // 2FA — códigos pendientes en memoria

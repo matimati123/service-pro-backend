@@ -198,7 +198,7 @@ app.get('/auth/google/callback',
 
     const token = jwt.sign(
       { id: req.user.id, email: req.user.email, rol: req.user.rol, nombre: req.user.nombre },
-      process.env.JWT_SECRET,
+      require('./middleware/jwtSecret'),
       { expiresIn: '8h' }
     );
     res.redirect(`${process.env.FRONTEND_URL}/oauth-callback.html?token=${token}`);

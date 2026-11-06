@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 // Mismo secreto que usa routes/users.js al firmar el token
-const JWT_SECRET = process.env.JWT_SECRET || 'servicepro_secret_2024';
+const JWT_SECRET = require('./jwtSecret');
 
 function leerToken(req) {
   const header = req.headers['authorization'] || '';
