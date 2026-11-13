@@ -30,6 +30,7 @@ var tareasRouter = require('./routes/tareas');
 var auditoriaRouter = require('./routes/auditoria');
 var auditoria = require('./services/auditoria');
 var healthRouter = require('./routes/health');
+var pagosRouter = require('./routes/pagos');
 
 var db = require('./db');
 var app = express();
@@ -228,6 +229,7 @@ app.use('/respaldo', respaldoRouter);
 app.use('/tareas', tareasRouter);
 app.use('/auditoria', auditoriaRouter);
 app.use('/health', healthRouter);
+app.use('/pagos', pagosRouter);
 
 // =============================================
 // MANEJO DE ERRORES
